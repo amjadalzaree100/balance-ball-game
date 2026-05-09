@@ -1,13 +1,104 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>balance-ball-game</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balance Ball</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- canvas will be added here automatically by Three.js -->
+  <div id="app"></div>
+
+  <!-- User Interface -->
+  <div id="ui-overlay">
+    <div id="ui-top">
+      <div id="score-display">
+        <span class="label">Points</span>
+        <span id="score">0</span>
+      </div>
+      <div id="timer-display">
+        <span class="label">Time</span>
+        <span id="timer">00:00</span>
+      </div>
+      <div id="level-display">
+        <span class="label">Level</span>
+        <span id="level">1</span>
+      </div>
+    </div>
+
+    <!-- Controls hint -->
+    <div id="controls-hint">
+      <span>↑↓←→ or WASD to tilt</span>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen active">
+    <div class="screen-content">
+      <h1 class="game-title">
+        <span class="title-ball">⚪</span>
+        Balance Ball
+      </h1>
+      <p class="game-subtitle">Tilt the surface to move the ball to the goal</p>
+      <div class="controls-preview">
+        <div class="key-group">
+          <div class="key">W</div>
+          <div class="key-row">
+            <div class="key">A</div>
+            <div class="key">S</div>
+            <div class="key">D</div>
+          </div>
+        </div>
+        <span class="or-text">or</span>
+        <div class="key-group">
+          <div class="key arrow">↑</div>
+          <div class="key-row">
+            <div class="key arrow">←</div>
+            <div class="key arrow">↓</div>
+            <div class="key arrow">→</div>
+          </div>
+        </div>
+      </div>
+      <button id="start-btn" class="game-btn primary">Start Game</button>
+    </div>
+  </div>
+
+  <!-- Win Screen -->
+  <div id="win-screen" class="screen">
+    <div class="screen-content">
+      <div class="result-icon win">🏆</div>
+      <h2>Well done!</h2>
+      <p id="win-message">You reached the goal!</p>
+      <div class="result-stats">
+        <div class="stat">
+          <span class="stat-label">Points</span>
+          <span id="final-score">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Time</span>
+          <span id="final-time">00:00</span>
+        </div>
+      </div>
+      <button id="next-btn" class="game-btn primary">Next Level</button>
+      <button id="restart-btn-win" class="game-btn secondary">Retry</button>
+    </div>
+  </div>
+
+  <!-- Lose Screen -->
+  <div id="lose-screen" class="screen">
+    <div class="screen-content">
+      <div class="result-icon lose">💧</div>
+      <h2>Ball fell!</h2>
+      <p>Try again more carefully</p>
+      <button id="restart-btn-lose" class="game-btn primary">Retry</button>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+
 </html>

@@ -1,1 +1,240 @@
-/* style.css */ 
+/* ============================================================
+   style.css — Balance Ball — Cyberpunk Grid Aesthetic
+   Theme: Dark tech, cyan glow, mono typography
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+:root {
+  --bg:           #060810;
+  --panel:        rgba(6, 8, 16, 0.88);
+  --cyan:         #00e5ff;
+  --cyan-dim:     rgba(0, 229, 255, 0.18);
+  --cyan-glow:    rgba(0, 229, 255, 0.35);
+  --gold:         #ffd600;
+  --red:          #ff1744;
+  --text:         #dde6f0;
+  --text-muted:   rgba(221, 230, 240, 0.45);
+  --border:       rgba(0, 229, 255, 0.22);
+  --font-mono:    'Share Tech Mono', 'Courier New', monospace;
+  --font-ui:      'Rajdhani', system-ui, sans-serif;
+  --radius-sm:    6px;
+  --radius:       12px;
+  --radius-lg:    20px;
+  --ease:         cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+#app { position: fixed; inset: 0; z-index: 0; }
+#app canvas { display: block; width: 100% !important; height: 100% !important; }
+
+/* CRT scanlines overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 5;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── HUD ─────────────────────────────────────────────────── */
+#ui-overlay {
+  position: fixed; inset: 0; z-index: 10;
+  pointer-events: none;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+#ui-top { display: flex; gap: 12px; justify-content: center; }
+
+#score-display, #timer-display, #level-display {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 18px 10px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1px;
+  backdrop-filter: blur(16px);
+  min-width: 86px;
+  position: relative; overflow: hidden;
+}
+#score-display::before, #timer-display::before, #level-display::before {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%;
+  height: 1px; background: var(--cyan);
+  opacity: 0.7; box-shadow: 0 0 6px var(--cyan);
+}
+
+.label {
+  font-size: 9px; font-family: var(--font-mono);
+  color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase;
+}
+
+#score, #timer, #level {
+  font-family: var(--font-mono); font-size: 24px; color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan), 0 0 30px rgba(0,229,255,0.3);
+  line-height: 1;
+}
+
+@keyframes scoreFlash {
+  0%   { color: var(--gold); text-shadow: 0 0 20px var(--gold); transform: scale(1.2); }
+  100% { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); transform: scale(1); }
+}
+.score-flash { animation: scoreFlash 0.4s var(--ease) forwards; }
+
+#controls-hint {
+  text-align: center; font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-muted); letter-spacing: 1.5px;
+  padding: 6px 16px; background: var(--panel);
+  border: 1px solid var(--border); border-radius: 50px;
+  width: fit-content; margin: 0 auto; backdrop-filter: blur(8px);
+}
+
+/* ── Screens ─────────────────────────────────────────────── */
+.screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(20px) saturate(1.2);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+.screen.active { opacity: 1; pointer-events: all; }
+
+.screen-content {
+  position: relative; text-align: center;
+  padding: 48px 52px; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  max-width: 440px; width: 92%;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0,229,255,0.06), 0 40px 80px rgba(0,0,0,0.6),
+              inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.screen-content::before, .screen-content::after {
+  content: ''; position: absolute;
+  width: 32px; height: 32px;
+  border-color: var(--cyan); border-style: solid; opacity: 0.5;
+}
+.screen-content::before { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+.screen-content::after  { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+.game-title {
+  font-family: var(--font-mono); font-size: 38px; font-weight: 400;
+  letter-spacing: 6px; text-transform: uppercase; color: var(--text);
+  display: flex; align-items: center; gap: 14px; line-height: 1;
+}
+
+.title-ball {
+  display: inline-flex; width: 36px; height: 36px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff, var(--cyan) 60%, #003d55);
+  box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,229,255,0.3);
+  animation: ballFloat 2.4s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes ballFloat {
+  0%,100% { transform: translateY(0) rotate(0deg); box-shadow: 0 0 20px var(--cyan); }
+  50%     { transform: translateY(-9px) rotate(180deg); box-shadow: 0 0 35px var(--cyan), 0 0 60px rgba(0,229,255,0.4); }
+}
+
+.game-subtitle {
+  font-size: 14px; font-weight: 600; font-family: var(--font-ui);
+  color: var(--text-muted); letter-spacing: 1px; line-height: 1.6;
+}
+
+.controls-preview { display: flex; align-items: center; gap: 16px; }
+.key-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.key-row { display: flex; gap: 3px; }
+
+.key {
+  width: 34px; height: 34px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 12px; color: var(--cyan);
+  background: var(--cyan-dim);
+  box-shadow: 0 3px 0 var(--cyan-glow), inset 0 1px 0 rgba(255,255,255,0.05);
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+.or-text { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.game-btn {
+  width: 100%; padding: 14px 32px;
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 14px;
+  letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s var(--ease);
+  position: relative; overflow: hidden;
+}
+.game-btn::after {
+  content: ''; position: absolute;
+  top: -50%; left: -60%; width: 40%; height: 200%;
+  background: rgba(255,255,255,0.12); transform: skewX(-20deg);
+  transition: left 0.4s var(--ease);
+}
+.game-btn:hover::after { left: 130%; }
+
+.game-btn.primary {
+  background: var(--cyan); color: #000; font-weight: 700;
+  box-shadow: 0 0 24px rgba(0,229,255,0.5), 0 4px 12px rgba(0,0,0,0.3);
+}
+.game-btn.primary:hover {
+  background: #33eeff; transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(0,229,255,0.7), 0 6px 20px rgba(0,0,0,0.4);
+}
+.game-btn.secondary {
+  background: transparent; color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.game-btn.secondary:hover {
+  color: var(--text); border-color: var(--border); background: var(--cyan-dim);
+}
+
+/* ── Result ──────────────────────────────────────────────── */
+.result-icon {
+  font-size: 60px;
+  animation: iconPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.4) both;
+}
+@keyframes iconPop {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+
+.screen-content h2 {
+  font-family: var(--font-mono); font-size: 26px; font-weight: 400;
+  letter-spacing: 4px; text-transform: uppercase; color: var(--text);
+}
+.screen-content p { font-size: 14px; color: var(--text-muted); letter-spacing: 0.5px; }
+
+.result-stats {
+  display: flex; gap: 36px; padding: 16px 24px;
+  background: rgba(0,229,255,0.04); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); width: 100%; justify-content: center;
+}
+.stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stat-label {
+  font-family: var(--font-mono); font-size: 9px;
+  color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase;
+}
+#final-score, #final-time {
+  font-family: var(--font-mono); font-size: 28px;
+  color: var(--gold); text-shadow: 0 0 14px rgba(255,214,0,0.5);
+}
+
+#score.score-zero {
+  color: #ff1744 !important;
+  text-shadow: 0 0 10px #ff1744, 0 0 30px rgba(255, 23, 68, 0.3) !important;
+  animation: none !important;  /* إيقاف أي أنيميشن موجودة */
+}

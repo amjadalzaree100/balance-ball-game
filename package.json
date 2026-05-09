@@ -1,17 +1,17 @@
 {
-  "name": "balance-ball-game",
-  "version": "0.0.0",
-  "private": true,
+  "name": "balance-ball",
+  "version": "1.0.0",
+  "description": "3D Balance Ball Game using Three.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
-  "devDependencies": {
-    "vite": "^8.0.10"
-  },
   "dependencies": {
-    "three": "^0.184.0"
+    "three": "^0.165.0"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
   }
 }

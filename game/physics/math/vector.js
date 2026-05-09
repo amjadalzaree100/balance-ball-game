@@ -1,0 +1,3 @@
+export const VectorUtils = {
+  // add, sub, scale, normalize, dot, cross...
+};
