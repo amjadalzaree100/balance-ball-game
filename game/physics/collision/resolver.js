@@ -5,7 +5,7 @@ import { CONFIG } from '../../core/config.js';
 export class CollisionResolver {
 
   constructor() {
-    this.bounceFactor = 0.3; // Fraction of velocity reflected on impact
+    this.bounceFactor = CONFIG.physics.bounceFactor;   
   }
 
   // Push ball outside the wall and partially reflect its velocity.
