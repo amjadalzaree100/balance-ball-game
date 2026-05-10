@@ -196,6 +196,26 @@ function update(delta) {
   }
 }
 
+// ── Keyboard: Enter key acts as the active screen's primary button ──
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Enter') {
+    const activeScreen = document.querySelector('.screen.active');
+    if (!activeScreen) return;
+
+    switch (activeScreen.id) {
+      case 'start-screen':
+        startGame();
+        break;
+      case 'win-screen':
+        nextLevel();   // goes to next level or restarts from first
+        break;
+      case 'lose-screen':
+        restartLevel();
+        break;
+    }
+  }
+});
+
 // ============================================================
 //  Render -- called every frame after update
 // ============================================================
