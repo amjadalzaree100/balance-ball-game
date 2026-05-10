@@ -13,7 +13,7 @@ export const CONFIG = {
     tiltSpeed: 0.04,        // Tilt speed when pressing keys
     tiltReturn: 0.92,       // Speed of surface returning to level after releasing keys
     ballRadius: 0.6,        // Ball radius
-    terminalVelocity: 15,   // Maximum ball speed
+    terminalVelocity: 10,   // Maximum ball speed
   },
 
   // ── Ball ────────────────────────────────────────────────

@@ -145,21 +145,23 @@ function update(delta) {
 
   // 4. Update ball visuals
   ballCtrl.update(delta);
+  const speed = Math.sqrt(physics.velocity.x ** 2 + physics.velocity.z ** 2);
+  ui.updateSpeed(speed);
+
 
   // 5. Calculate real Y position based on surface tilt + ball X/Z
-// 5. Calculate real Y position based on surface tilt + ball X/Z
-const bp = ballCtrl.getPosition();
-const tiltX = physics.tiltX;
-const tiltZ = physics.tiltZ;
-const surfaceY = bp.x * Math.sin(tiltZ) - bp.z * Math.sin(tiltX) * Math.cos(tiltZ);
-const tiltedY = surfaceY + CONFIG.physics.ballRadius;
+  const bp = ballCtrl.getPosition();
+  const tiltX = physics.tiltX;
+  const tiltZ = physics.tiltZ;
+  const surfaceY = bp.x * Math.sin(tiltZ) - bp.z * Math.sin(tiltX) * Math.cos(tiltZ);
+  const tiltedY = surfaceY + CONFIG.physics.ballRadius;
 
-// Update ball's world Y (used for fall detection)
-bp.y = tiltedY;
+  // Update ball's world Y (used for fall detection)
+  bp.y = tiltedY;
 
-// Apply to visual meshes
-ballCtrl.renderer.mesh.position.y = tiltedY;
-ballCtrl.renderer.glowMesh.position.y = tiltedY - 0.1;
+  // Apply to visual meshes
+  ballCtrl.renderer.mesh.position.y = tiltedY;
+  ballCtrl.renderer.glowMesh.position.y = tiltedY - 0.1;
 
   // 6. Animate maze decorations (goal, holes)
   mazeRenderer.update(delta);

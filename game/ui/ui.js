@@ -1,7 +1,9 @@
 // ============================================================
 //  ui.js — Controls all DOM screens and the HUD
-//  Manages: start screen, win/lose screens, score, timer
+//  Manages: start screen, win/lose screens, score, timer, speed
 // ============================================================
+
+import { CONFIG } from '../core/config.js';
 
 export class UI {
 
@@ -27,6 +29,10 @@ export class UI {
 
     // Score state
     this._score     = 0;
+
+    // Speed display elements
+    this._speedEl   = document.getElementById('speed');
+    this._speedBar  = document.getElementById('speed-bar');
   }
 
   // ── Timer 
@@ -88,7 +94,19 @@ export class UI {
     this._levelEl.textContent = number;
   }
 
-  // ── Screen visibility 
+  // ── Speed display ─────────────────────────────────────────
+  updateSpeed(speed) {
+    const maxSpeed = CONFIG.physics.terminalVelocity;
+
+    // Update the numeric value (one decimal place)
+    this._speedEl.textContent = speed.toFixed(1);
+
+    // Update the speed bar width (% of max speed)
+    const percent = Math.min(100, (speed / maxSpeed) * 100);
+    this._speedBar.style.width = `${percent}%`;
+  }
+
+  // ── Screen visibility ─────────────────────────────────────
   showStart() {
     this._setActiveScreen(this._startScreen);
   }
