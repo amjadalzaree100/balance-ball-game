@@ -48,9 +48,9 @@ export class PhysicsEngine {
   // Update tilt angles from input each frame
   updateTilt(inputX, inputZ, delta) {
     if (inputX !== 0) {
-      this.tiltX += inputX * this.tiltSpeed;
+      this.tiltX += inputX * this.tiltSpeed * delta * 60; // frame-rate independent
     } else {
-      this.tiltX *= this.tiltReturn;
+      this.tiltX *= Math.pow(this.tiltReturn, delta * 60);
     }
 
     if (inputZ !== 0) {
@@ -67,13 +67,13 @@ export class PhysicsEngine {
   step(delta) {
     if (!this.ballPosition) return;
 
-    this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);
-    this.frictionSystem.apply(this.velocity);
-    this._clampVelocity();
-    this.integrationSystem.integrate(this.ballPosition, this.velocity, delta);
+    this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);    // Calculate acceleration
+    this._clampVelocity();                                                     // Restrict the velocity
+    this.integrationSystem.integrate(this.ballPosition, this.velocity, delta); // Update position based on velocity
+    this.frictionSystem.apply(this.velocity, delta);                          // Apply friction to velocity
 
     if (this.mazeData) {
-      this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);
+      this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);  // Check for and resolve collisions with maze walls and bounds
     }
   }
 

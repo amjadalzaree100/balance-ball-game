@@ -1,6 +1,6 @@
 // ============================================================
-//  controls.js — Reads keyboard input
-//  Gives you values between -1 and 1 for each axis
+//  controls.js — Reads keyboard and mouse input
+//  Gives you values between -1 and 1 for each tilt axis
 // ============================================================
 
 export class Controls {
@@ -9,7 +9,13 @@ export class Controls {
     // State of pressed keys
     this._keys = new Set();
 
-    // Bind events
+    // Mouse state
+    this._mouseX = 0;          // Horizontal mouse position (-1 left … 1 right)
+    this._mouseY = 0;          // Vertical mouse position (-1 top … 1 bottom)
+    this._mouseSensitivity = 1.0;  // Multiplier for mouse input
+    this._mouseEnabled = true;     // Enable / disable mouse control
+
+    // Bind keyboard events
     window.addEventListener('keydown', (e) => this._keys.add(e.code));
     window.addEventListener('keyup',   (e) => this._keys.delete(e.code));
 
@@ -19,9 +25,24 @@ export class Controls {
         e.preventDefault();
       }
     });
+
+    // Bind mouse movement
+    window.addEventListener('mousemove', (e) => this._onMouseMove(e));
   }
 
-  // Is the key currently pressed?
+  // ── Mouse move handler ─────────────────────────────────────
+  // _onMouseMove(event) {
+  //   // Convert screen coordinates to normalized range -1 … 1
+  //   this._mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+  //   this._mouseY = (event.clientY / window.innerHeight) * 2 - 1;
+  // }
+
+  // ── Enable / disable mouse control ─────────────────────────
+  setMouseEnabled(enabled) {
+    this._mouseEnabled = enabled;
+  }
+
+  // ── Is the key currently pressed? ─────────────────────────
   isDown(code) {
     return this._keys.has(code);
   }
@@ -30,17 +51,33 @@ export class Controls {
   // Positive value = backward, negative = forward
   getTiltX() {
     let v = 0;
+
+    // Keyboard input
     if (this.isDown('ArrowUp')   || this.isDown('KeyW')) v -= 1;
     if (this.isDown('ArrowDown') || this.isDown('KeyS')) v += 1;
+
+    // Mouse input: moving mouse up → negative tiltX (forward)
+    if (this._mouseEnabled) {
+      v += this._mouseY * this._mouseSensitivity;
+    }
+
     return v;
   }
 
-  // ── Tilt on Z axis (Left / Right) ──────────────────
+  // ── Tilt on Z axis (Left / Right) ──────────────────────
   // Positive value = right, negative = left
   getTiltZ() {
     let v = 0;
+
+    // Keyboard input
     if (this.isDown('ArrowLeft')  || this.isDown('KeyA')) v += 1;
     if (this.isDown('ArrowRight') || this.isDown('KeyD')) v -= 1;
+
+    // Mouse input: moving mouse right → positive tiltZ (right)
+    if (this._mouseEnabled) {
+      v -= this._mouseX * this._mouseSensitivity;
+    }
+
     return v;
   }
 

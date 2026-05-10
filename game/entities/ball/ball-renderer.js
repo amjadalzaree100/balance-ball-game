@@ -51,7 +51,7 @@ export class BallRenderer {
     this.mesh.add(ring);
 
     // Glow sprite — soft cyan halo beneath the ball
-    const glowGeo = new THREE.SphereGeometry(r * 1.6, 16, 16);
+    const glowGeo = new THREE.SphereGeometry(r * 1.2, 16, 16);
     const glowMat = new THREE.MeshBasicMaterial({
       color:       0x00e5ff,
       transparent: true,

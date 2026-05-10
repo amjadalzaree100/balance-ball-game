@@ -8,12 +8,12 @@ export const CONFIG = {
   // ── Physics ──────────────────────────────────────────────
   physics: {
     gravity: 100.0,           // Gravity strength (m/s²)
-    friction: 0.98,        // Friction coefficient (1 = no friction, 0 = instant stop)
+    friction: 0.98 ,        // Friction coefficient (1 = no friction, 0 = instant stop)
     maxTiltAngle: 0.10,     // Maximum tilt angle of the surface (radians ≈ 25°)
     tiltSpeed: 0.04,        // Tilt speed when pressing keys
     tiltReturn: 0.92,       // Speed of surface returning to level after releasing keys
     ballRadius: 0.6,        // Ball radius
-    terminalVelocity: 85,   // Maximum ball speed
+    terminalVelocity: 15,   // Maximum ball speed
   },
 
   // ── Ball ────────────────────────────────────────────────

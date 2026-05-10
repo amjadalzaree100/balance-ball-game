@@ -4,8 +4,10 @@ export class FrictionSystem {
     this.friction = friction;
   }
 
-  apply(velocity) {
-    velocity.x *= this.friction;
-    velocity.z *= this.friction;
-  }
+  apply(velocity, delta) {
+    // Frame-rate independent friction using exponential decay
+    const f = Math.pow(this.friction, delta * 60);
+    velocity.x *= f;
+    velocity.z *= f;
+    }
 }

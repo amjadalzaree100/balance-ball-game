@@ -22,7 +22,7 @@ export class CollisionResolver {
         break;
       case 'right':
         ballPos.x  = maxX + r;
-        velocity.x = Math.abs(velocity.x) * this.bounceFactor;
+        velocity.x = -Math.abs(velocity.x) * this.bounceFactor;
         break;
       case 'top':
         ballPos.z  = minZ - r;
@@ -30,7 +30,7 @@ export class CollisionResolver {
         break;
       case 'bottom':
         ballPos.z  = maxZ + r;
-        velocity.z = Math.abs(velocity.z) * this.bounceFactor;
+        velocity.z = -Math.abs(velocity.z) * this.bounceFactor;
         break;
     }
   }

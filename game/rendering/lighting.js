@@ -32,15 +32,15 @@ export class Lighting {
     this.directionalLight.castShadow = true;
 
     // Shadow quality
-    this.directionalLight.shadow.mapSize.width  = 2048;
-    this.directionalLight.shadow.mapSize.height = 2048;
-    this.directionalLight.shadow.camera.near    = 0.5;
-    this.directionalLight.shadow.camera.far     = 100;
-    this.directionalLight.shadow.camera.left    = -20;
-    this.directionalLight.shadow.camera.right   = 20;
-    this.directionalLight.shadow.camera.top     = 20;
-    this.directionalLight.shadow.camera.bottom  = -20;
-    this.directionalLight.shadow.bias           = -0.001;
+    this.directionalLight.shadow.mapSize.width = 2048;   // Shadow map width (resolution)
+    this.directionalLight.shadow.mapSize.height = 2048;   // Shadow map height (resolution)
+    this.directionalLight.shadow.camera.near = 0.5;    // Near clipping plane of the shadow camera
+    this.directionalLight.shadow.camera.far = 100;    // Far clipping plane of the shadow camera
+    this.directionalLight.shadow.camera.left = -20;    // Left bound of the shadow camera frustum
+    this.directionalLight.shadow.camera.right = 20;     // Right bound of the shadow camera frustum
+    this.directionalLight.shadow.camera.top = 20;     // Top bound of the shadow camera frustum
+    this.directionalLight.shadow.camera.bottom = -20;    // Bottom bound of the shadow camera frustum
+    this.directionalLight.shadow.bias = -0.001; // Shadow bias (helps prevent shadow acne)
 
     this.scene.add(this.directionalLight);
 
