@@ -127,10 +127,12 @@ function triggerLose() {
 //  Main update -- called every frame by GameLoop
 // ============================================================
 function update(delta) {
+
+  controls.update(); 
+
   // Always update timer display
   ui.updateTimer(delta);
 
-  controls.update(); 
 
   if (state !== STATE.PLAYING) return;
 
@@ -198,23 +200,13 @@ function update(delta) {
   }
 }
 
-// ── Keyboard: Enter key acts as the active screen's primary button ──
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Enter') {
-    const activeScreen = document.querySelector('.screen.active');
-    if (!activeScreen) return;
-
-    switch (activeScreen.id) {
-      case 'start-screen':
-        startGame();
-        break;
-      case 'win-screen':
-        nextLevel();   // goes to next level or restarts from first
-        break;
-      case 'lose-screen':
-        restartLevel();
-        break;
-    }
+controls.onAction(() => {
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) return;
+  switch (activeScreen.id) {
+    case 'start-screen': startGame(); break;
+    case 'win-screen':   nextLevel(); break;
+    case 'lose-screen':  restartLevel(); break;
   }
 });
 

@@ -17,16 +17,23 @@ export class Controls {
     this._prevGamepadButtons = [];   // previous frame button states
     this._actionCallback = null; // callback for X / Enter actions
 
-    // Bind keyboard events
-    window.addEventListener('keydown', (e) => this._keys.add(e.code));
-    window.addEventListener('keyup', (e) => this._keys.delete(e.code));
-
-    // Prevent page scrolling with arrow keys
+    // ── Keyboard events ────────────────────────────────
     window.addEventListener('keydown', (e) => {
+      this._keys.add(e.code);
+
+      // Fire unified action callback on Enter
+      if (e.code === 'Enter' && this._actionCallback) {
+        e.preventDefault();
+        this._actionCallback();
+      }
+
+      // Prevent page scrolling with arrow keys
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
         e.preventDefault();
       }
     });
+
+    window.addEventListener('keyup', (e) => this._keys.delete(e.code));
 
     // Bind mouse movement
     window.addEventListener('mousemove', (e) => this._onMouseMove(e));
