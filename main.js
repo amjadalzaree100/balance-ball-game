@@ -130,6 +130,8 @@ function update(delta) {
   // Always update timer display
   ui.updateTimer(delta);
 
+  controls.update(); 
+
   if (state !== STATE.PLAYING) return;
 
   // 1. Read input and tilt the surface
