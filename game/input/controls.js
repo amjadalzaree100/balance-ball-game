@@ -37,11 +37,15 @@ export class Controls {
 
     // Bind mouse movement
     window.addEventListener('mousemove', (e) => this._onMouseMove(e));
-  }
 
-  // ── Mouse move handler ─────────────────────────────────────
+    // Voice control tilt values -- set externally by VoiceControl each frame
+    // These are added on top of keyboard / mouse / gamepad input
+    this._voiceTiltX = 0;
+    this._voiceTiltZ = 0;
+  }
+  // -- Mouse move handler
+  // Converts screen coordinates to normalized range -1 to 1
   // _onMouseMove(event) {
-  //   // Convert screen coordinates to normalized range -1 … 1
   //   this._mouseX = (event.clientX / window.innerWidth) * 2 - 1;
   //   this._mouseY = (event.clientY / window.innerHeight) * 2 - 1;
   // }
@@ -59,7 +63,7 @@ export class Controls {
   // ── Gamepad support ─────────────────────────────────────────
   _getGamepadInput() {
     const gamepads = navigator.getGamepads();
-    const gamepad = gamepads[0]; // أول قبضة
+    const gamepad = gamepads[0]; // 
 
     if (!gamepad) return { x: 0, z: 0 };
 
@@ -105,7 +109,13 @@ export class Controls {
     // Save current state for next frame
     this._prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
   }
-  // ── Tilt on X axis (Forward / Backward) ──────────────────
+  // -- Receive tilt values from VoiceControl each frame
+  setVoiceTilt(x, z) {
+    this._voiceTiltX = x;
+    this._voiceTiltZ = z;
+  }
+
+  // ?? Tilt on X axis (Forward / Backward) ??????????????????
   // Positive value = backward, negative = forward
   getTiltX() {
     let v = 0;
@@ -122,6 +132,10 @@ export class Controls {
     // add gamepad input
     const gp = this._getGamepadInput();
     v += gp.z;
+
+    // Add voice command tilt (overrides if voice says a direction)
+    v += this._voiceTiltX;
+
     return v;
   }
 
@@ -134,7 +148,7 @@ export class Controls {
     if (this.isDown('ArrowLeft') || this.isDown('KeyA')) v += 1;
     if (this.isDown('ArrowRight') || this.isDown('KeyD')) v -= 1;
 
-    // Mouse input: moving mouse right → positive tiltZ (right)
+    // Mouse input: moving mouse right ? positive tiltZ (right)
     if (this._mouseEnabled) {
       v -= this._mouseX * this._mouseSensitivity;
     }
@@ -142,6 +156,9 @@ export class Controls {
     // add gamepad input
     const gp = this._getGamepadInput();
     v -= gp.x;
+
+    // Add voice command tilt
+    v += this._voiceTiltZ;
 
     return v;
   }

@@ -1,6 +1,6 @@
 // ============================================================
 //  main.js -- Entry point: wires every system together
-//  Game states: IDLE → PLAYING → WIN | LOSE
+//  Game states: IDLE ? PLAYING ? WIN | LOSE
 // ============================================================
 
 import { SceneManager } from './game/core/scene-manager.js';
@@ -12,6 +12,7 @@ import { Renderer } from './game/rendering/renderer.js';
 import { Camera } from './game/rendering/camera.js';
 
 import { Controls } from './game/input/controls.js';
+import { VoiceControl } from './game/input/voice-control.js';
 
 import { PhysicsEngine } from './game/physics/engine/physics-engine.js';
 
@@ -34,6 +35,7 @@ const lighting = new Lighting(sceneManager.scene);
 const renderer = new Renderer(sceneManager);
 const cameraCtrl = new Camera(sceneManager.camera);
 const controls = new Controls();
+const voice   = new VoiceControl();
 const physics = new PhysicsEngine();
 const levelManager = new LevelManager();
 const ui = new UI();
@@ -47,6 +49,34 @@ let state = STATE.IDLE;
 
 // Score ticker -- subtract points each second
 let _scoreTick = 0;
+
+// ============================================================
+//  Voice control callbacks
+// ============================================================
+
+// Update mic button icon when listening state changes
+voice.onListeningChange = (listening) => {
+  const btn = document.getElementById('mic-btn');
+  if (!btn) return;
+  btn.classList.toggle('active', listening);
+  btn.title = listening ? 'Stop voice control' : 'Start voice control (up/down/left/right/stop)';
+};
+
+// Show the last recognized command on screen
+voice.onCommand = (transcript) => {
+  const el = document.getElementById('voice-feedback');
+  if (!el) return;
+  el.textContent = '"' + transcript + '"';
+  el.classList.remove('voice-fade');
+  void el.offsetWidth;
+  el.classList.add('voice-fade');
+};
+
+// Mic button click handler
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('mic-btn');
+  if (btn) btn.addEventListener('click', () => voice.toggle());
+});
 
 // ============================================================
 //  Load level into maze + ball
@@ -128,7 +158,10 @@ function triggerLose() {
 // ============================================================
 function update(delta) {
 
-  controls.update(); 
+  controls.update();
+
+  // Pass current voice tilt values into controls each frame
+  controls.setVoiceTilt(voice.tiltX, voice.tiltZ);
 
   // Always update timer display
   ui.updateTimer(delta);

@@ -63,5 +63,6 @@ export const CONFIG = {
     scorePerLevel: 500,    // Base points for completing the level
     timePenalty: 10,         // Points deducted per second
   },
+  
 
 };
