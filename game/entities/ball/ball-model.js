@@ -32,7 +32,7 @@ export class BallModel {
 
     // Roll axis is perpendicular to the movement direction
     const axis = new THREE.Vector3(-velocityZ, 0, velocityX).normalize();
-    const angle = (speed * delta) / this.radius;
+    const angle = -(speed * delta) / this.radius;
 
     const deltaQuat = new THREE.Quaternion();
     deltaQuat.setFromAxisAngle(axis, angle);
