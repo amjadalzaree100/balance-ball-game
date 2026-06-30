@@ -54,9 +54,9 @@ export class PhysicsEngine {
     }
 
     if (inputZ !== 0) {
-      this.tiltZ += inputZ * this.tiltSpeed;
+      this.tiltZ += inputZ * this.tiltSpeed * delta * 60;
     } else {
-      this.tiltZ *= this.tiltReturn;
+      this.tiltZ *= Math.pow(this.tiltReturn, delta * 60);
     }
 
     this.tiltX = Math.max(-this.maxTiltAngle, Math.min(this.maxTiltAngle, this.tiltX));

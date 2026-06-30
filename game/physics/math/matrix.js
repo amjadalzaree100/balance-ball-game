@@ -1,3 +1,0 @@
-export const MatrixUtils = {
-  // rotateX, rotateZ, combineTilts...
-};

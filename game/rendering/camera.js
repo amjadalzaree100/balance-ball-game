@@ -15,6 +15,10 @@ export class Camera {
     const p = CONFIG.camera.position;
     this._basePos = new THREE.Vector3(p.x, p.y, p.z);
 
+    // Look-at target from config (re-used every frame to avoid allocations)
+    const l = CONFIG.camera.lookAt;
+    this._lookAt = new THREE.Vector3(l.x, l.y, l.z);
+
     // Current smoothed offset
     this._offset = new THREE.Vector3();
 
@@ -37,7 +41,7 @@ export class Camera {
       this._basePos.y,
       this._basePos.z + this._offset.z,
     );
-    this.camera.lookAt(0, 0, 0);
+    this.camera.lookAt(this._lookAt);
   }
 
 }
