@@ -79,6 +79,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
+//  Mouse toggle — keep the HUD badge in sync with Controls
+// ============================================================
+controls.onMouseEnabledChange = (enabled) => {
+  const el = document.getElementById('mouse-toggle');
+  if (!el) return;
+  el.classList.toggle('mouse-on', enabled);
+  el.classList.toggle('mouse-off', !enabled);
+  el.textContent = enabled ? 'M: Mouse ON' : 'M: Mouse OFF';
+};
+
+// ============================================================
 //  Load level into maze + ball
 // ============================================================
 function loadLevel() {
@@ -101,8 +112,9 @@ function loadLevel() {
   CONFIG.ball.startPosition = startPos;
   ballCtrl.reset();
 
-  // Update HUD level number
+  // Update HUD level number and highlight current level in the selector
   ui.setLevel(levelManager.getCurrentNumber());
+  ui.setCurrentLevel(levelManager.getCurrentNumber() - 1);
   ui.setScore(CONFIG.game.scorePerLevel);
 }
 
@@ -115,6 +127,7 @@ function startGame() {
   ui.hideAllScreens();
   ui.startTimer();
   physics.reset();
+  _scoreTick = 0;
 }
 
 function restartLevel() {
@@ -206,6 +219,9 @@ function update(delta) {
   // 7. Camera sway following tilt
   cameraCtrl.update(physics.tiltX, physics.tiltZ);
 
+  // 7b. Track the maze group with the cyan point light
+  lighting.followMaze(mazeRenderer.group);
+
   // 8. Scoring -- deduct points per second
   _scoreTick += delta;
   if (_scoreTick >= 1) {
@@ -265,6 +281,16 @@ ui.onStart(() => startGame());
 ui.onNext(() => nextLevel());
 ui.onRestartWin(() => restartLevel());
 ui.onRestartLose(() => restartLevel());
+
+// Populate the level-selector grids (start, win, lose screens).
+// They all show the same buttons; clicking any one starts that level.
+const allLevelNames = levelManager.getAllLevels().map((l) => l.name);
+ui.populateLevelSelector(allLevelNames);
+ui.setCurrentLevel(levelManager.getCurrentNumber() - 1);
+ui.onPickLevel((index) => {
+  levelManager.jumpToLevel(index);
+  startGame();
+});
 
 // ============================================================
 //  Boot sequence

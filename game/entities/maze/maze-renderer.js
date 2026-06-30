@@ -46,7 +46,7 @@ export class MazeRenderer {
     const { width, depth } = mazeModel.bounds;
     const geo = new THREE.BoxGeometry(width, 0.2, depth);
     const mat = new THREE.MeshStandardMaterial({
-      color:     0x0d1117,
+      color:     CONFIG.maze.floorColor,
       metalness: 0.3,
       roughness: 0.8,
     });
@@ -138,7 +138,7 @@ export class MazeRenderer {
       // Dark recessed cylinder
       const geo = new THREE.CylinderGeometry(hole.radius, hole.radius * 0.8, 0.5, 32);
       const mat = new THREE.MeshStandardMaterial({
-        color:     0x000000,
+        color:     CONFIG.maze.holeColor,
         metalness: 0.0,
         roughness: 1.0,
         emissive:  0x1a0000,
@@ -176,8 +176,8 @@ export class MazeRenderer {
       0.1, 32
     );
     const baseMat = new THREE.MeshStandardMaterial({
-      color:             0x00e5ff,
-      emissive:          0x00e5ff,
+      color:             CONFIG.maze.goalColor,
+      emissive:          CONFIG.maze.goalColor,
       emissiveIntensity: 0.8,
       metalness:         0.9,
       roughness:         0.1,
@@ -189,7 +189,7 @@ export class MazeRenderer {
     // Vertical light beam — thin glowing cylinder
     const beamGeo = new THREE.CylinderGeometry(0.05, CONFIG.game.goalRadius, 8, 16, 1, true);
     const beamMat = new THREE.MeshBasicMaterial({
-      color:       0x00e5ff,
+      color:       CONFIG.maze.goalColor,
       transparent: true,
       opacity:     0.15,
       side:        THREE.DoubleSide,
@@ -200,7 +200,7 @@ export class MazeRenderer {
 
     // Outer rotating ring
     const outerRingGeo = new THREE.TorusGeometry(CONFIG.game.goalRadius * 1.4, 0.05, 8, 32);
-    const outerRingMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.5 });
+    const outerRingMat = new THREE.MeshBasicMaterial({ color: CONFIG.maze.goalColor, transparent: true, opacity: 0.5 });
     this._goalRing = new THREE.Mesh(outerRingGeo, outerRingMat);
     this._goalRing.rotation.x = -Math.PI / 2;
     this._goalRing.position.set(gp.x, 0.1, gp.z);

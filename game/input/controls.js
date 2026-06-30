@@ -12,8 +12,10 @@ export class Controls {
     // Mouse state
     this._mouseX = 0;          // Horizontal mouse position (-1 left … 1 right)
     this._mouseY = 0;          // Vertical mouse position (-1 top … 1 bottom)
-    this._mouseSensitivity = 1.0;  // Multiplier for mouse input
-    this._mouseEnabled = true;     // Enable / disable mouse control
+    this._mouseSensitivity = 0.7;  // Multiplier for mouse input (reduced from 1.0)
+    this._mouseDeadZone   = 0.25;  // 25% dead zone around screen center
+    this._mouseEnabled    = false; // Default OFF — press M to enable
+    this.onMouseEnabledChange = null; // Optional UI hook (assign a function)
     this._prevGamepadButtons = [];   // previous frame button states
     this._actionCallback = null; // callback for X / Enter actions
 
@@ -25,6 +27,13 @@ export class Controls {
       if (e.code === 'Enter' && this._actionCallback) {
         e.preventDefault();
         this._actionCallback();
+      }
+
+      // M toggles mouse tilt (ignore if a modifier is held)
+      if (e.code === 'KeyM' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        this.setMouseEnabled(!this._mouseEnabled);
+        return;
       }
 
       // Prevent page scrolling with arrow keys
@@ -45,15 +54,29 @@ export class Controls {
   }
   // -- Mouse move handler
   // Converts screen coordinates to normalized range -1 to 1
-  // _onMouseMove(event) {
-  //   this._mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-  //   this._mouseY = (event.clientY / window.innerHeight) * 2 - 1;
-  // }
+  _onMouseMove(event) {
+    this._mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    this._mouseY = (event.clientY / window.innerHeight) * 2 - 1;
+  }
+
+  // ── Remap a value in [-1, 1] through a centered dead zone ─────
+  // Values inside the dead zone become 0; the outer range is stretched
+  // back into [-1, 1] so the response is still smooth at the edges.
+  _remapWithDeadZone(v) {
+    const dz = this._mouseDeadZone;
+    if (Math.abs(v) < dz) return 0;
+    const sign = v < 0 ? -1 : 1;
+    return sign * (Math.abs(v) - dz) / (1 - dz);
+  }
 
   // ── Enable / disable mouse control ─────────────────────────
   setMouseEnabled(enabled) {
-    this._mouseEnabled = enabled;
+    this._mouseEnabled = !!enabled;
+    if (this.onMouseEnabledChange) this.onMouseEnabledChange(this._mouseEnabled);
   }
+
+  // ── Current mouse-enabled state ────────────────────────────
+  isMouseEnabled() { return this._mouseEnabled; }
 
   // ── Is the key currently pressed? ─────────────────────────
   isDown(code) {
@@ -126,7 +149,7 @@ export class Controls {
 
     // Mouse input: moving mouse up → negative tiltX (forward)
     if (this._mouseEnabled) {
-      v += this._mouseY * this._mouseSensitivity;
+      v += this._remapWithDeadZone(this._mouseY) * this._mouseSensitivity;
     }
 
     // add gamepad input
@@ -148,9 +171,9 @@ export class Controls {
     if (this.isDown('ArrowLeft') || this.isDown('KeyA')) v += 1;
     if (this.isDown('ArrowRight') || this.isDown('KeyD')) v -= 1;
 
-    // Mouse input: moving mouse right ? positive tiltZ (right)
+    // Mouse input: moving mouse right → positive tiltZ (right)
     if (this._mouseEnabled) {
-      v -= this._mouseX * this._mouseSensitivity;
+      v -= this._remapWithDeadZone(this._mouseX) * this._mouseSensitivity;
     }
 
     // add gamepad input

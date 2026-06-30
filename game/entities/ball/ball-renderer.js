@@ -12,6 +12,7 @@ export class BallRenderer {
     this.scene   = scene;
     this.mesh    = null;
     this.glowMesh = null;
+    this._ringMesh = null;
 
     // Trail: array of small fading spheres
     this._trail      = [];
@@ -29,9 +30,9 @@ export class BallRenderer {
     // Outer shell — chrome-like reflective sphere
     const geo = new THREE.SphereGeometry(r, 64, 64);
     const mat = new THREE.MeshStandardMaterial({
-      color:      0xfafafa,
-      metalness:  0.95,
-      roughness:  0.05,
+      color:      CONFIG.ball.color,
+      metalness:  CONFIG.ball.metalness,
+      roughness:  CONFIG.ball.roughness,
       envMapIntensity: 1.5,
     });
 
@@ -46,9 +47,9 @@ export class BallRenderer {
       transparent: true,
       opacity:     0.6,
     });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    this.mesh.add(ring);
+    this._ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    this._ringMesh.rotation.x = Math.PI / 2;
+    this.mesh.add(this._ringMesh);
 
     // Glow sprite — soft cyan halo beneath the ball
     const glowGeo = new THREE.SphereGeometry(r * 1.2, 16, 16);
@@ -137,6 +138,11 @@ export class BallRenderer {
     this.mesh.material.dispose();
     this.glowMesh.geometry.dispose();
     this.glowMesh.material.dispose();
+    if (this._ringMesh) {
+      this._ringMesh.geometry.dispose();
+      this._ringMesh.material.dispose();
+      this._ringMesh = null;
+    }
     this._trail.forEach((d) => {
       this.scene.remove(d.mesh);
       d.mesh.geometry.dispose();

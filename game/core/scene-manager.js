@@ -32,7 +32,7 @@ export class SceneManager {
     app.appendChild(this.renderer.domElement);
 
     // Perspective camera
-    const { fov, near, far, position } = CONFIG.camera;
+    const { fov, near, far, position, lookAt } = CONFIG.camera;
     this.camera = new THREE.PerspectiveCamera(
       fov,
       window.innerWidth / window.innerHeight,
@@ -40,7 +40,7 @@ export class SceneManager {
       far
     );
     this.camera.position.set(position.x, position.y, position.z);
-    this.camera.lookAt(0, 0, 0);
+    this.camera.lookAt(lookAt.x, lookAt.y, lookAt.z);
 
     window.addEventListener('resize', () => this._onResize());
   }

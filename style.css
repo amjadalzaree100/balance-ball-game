@@ -95,11 +95,29 @@ body::after {
 .score-flash { animation: scoreFlash 0.4s var(--ease) forwards; }
 
 #controls-hint {
-  text-align: center; font-family: var(--font-mono); font-size: 11px;
+  display: flex; align-items: center; gap: 12px;
+  text-align: center; font-family: var(--font-mono); font-size: 14px;
   color: var(--text-muted); letter-spacing: 1.5px;
-  padding: 6px 16px; background: var(--panel);
+  padding: 10px 22px; background: var(--panel);
   border: 1px solid var(--border); border-radius: 50px;
   width: fit-content; margin: 0 auto; backdrop-filter: blur(8px);
+}
+
+#mouse-toggle {
+  transition: color 0.2s var(--ease), text-shadow 0.2s var(--ease);
+  cursor: default;
+}
+#mouse-toggle.mouse-off {
+  color: var(--text-muted);
+  text-shadow: none;
+}
+#mouse-toggle.mouse-on {
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+}
+.hint-sep {
+  color: var(--text-muted);
+  opacity: 0.5;
 }
 
 /* ── Screens ─────────────────────────────────────────────── */
@@ -237,6 +255,53 @@ body::after {
   color: #ff1744 !important;
   text-shadow: 0 0 10px #ff1744, 0 0 30px rgba(255, 23, 68, 0.3) !important;
   animation: none !important;  /* إيقاف أي أنيميشن موجودة */
+}
+
+/* ── Level selector (start / win / lose screens) ─────────── */
+.level-select {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; width: 100%; margin-top: 4px;
+}
+.level-select-label {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-muted); letter-spacing: 2.5px; text-transform: uppercase;
+}
+.level-buttons {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+}
+.level-btn {
+  width: 44px; height: 44px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--cyan);
+  font-family: var(--font-mono); font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s var(--ease);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: visible;
+  text-shadow: 0 0 6px var(--cyan);
+}
+.level-btn:hover {
+  background: var(--cyan-dim);
+  color: #fff;
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px var(--cyan-glow);
+  transform: translateY(-2px);
+  text-shadow: 0 0 10px var(--cyan);
+}
+.level-btn:active { transform: translateY(0); }
+.level-btn.current {
+  background: var(--cyan);
+  color: #000;
+  font-weight: 700;
+  border-color: var(--cyan);
+  box-shadow: 0 0 18px var(--cyan), 0 0 36px var(--cyan-glow);
+  text-shadow: none;
+}
+.level-btn.current::after {
+  content: ''; position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 1px solid var(--cyan); border-radius: calc(var(--radius-sm) + 3px);
+  opacity: 0.5; pointer-events: none;
 }
 
 /* Speed display -- same panel style as score/timer/level, gold accent */

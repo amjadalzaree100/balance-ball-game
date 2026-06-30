@@ -33,6 +33,9 @@ export class UI {
     // Speed display elements
     this._speedEl   = document.getElementById('speed');
     this._speedBar  = document.getElementById('speed-bar');
+
+    // Level selector — callback fired when a level button is clicked
+    this._pickLevelCallback = null;
   }
 
   // ── Timer 
@@ -144,5 +147,41 @@ export class UI {
   onNext(cb)    { document.getElementById('next-btn').addEventListener('click', cb); }
   onRestartWin(cb)  { document.getElementById('restart-btn-win').addEventListener('click', cb); }
   onRestartLose(cb) { document.getElementById('restart-btn-lose').addEventListener('click', cb); }
+
+  // ── Level selector ───────────────────────────────────────
+  // Populate every `.level-buttons` container on the page with one
+  // button per level.  `names` is an array of human-readable names.
+  populateLevelSelector(names) {
+    const containers = document.querySelectorAll('.level-buttons');
+    containers.forEach((container) => {
+      container.innerHTML = '';
+      names.forEach((name, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'level-btn';
+        btn.type   = 'button';
+        btn.dataset.level = index;
+        btn.textContent = (index + 1).toString();
+        btn.title = name;
+        btn.addEventListener('click', () => {
+          if (this._pickLevelCallback) this._pickLevelCallback(index);
+        });
+        container.appendChild(btn);
+      });
+    });
+  }
+
+  // Highlight the level button matching the given 0-based index.
+  setCurrentLevel(index) {
+    document.querySelectorAll('.level-btn').forEach((btn) => {
+      const i = parseInt(btn.dataset.level, 10);
+      btn.classList.toggle('current', i === index);
+    });
+  }
+
+  // Register a callback fired when any level button is clicked.
+  // The callback receives the 0-based level index.
+  onPickLevel(callback) {
+    this._pickLevelCallback = callback;
+  }
 
 }
