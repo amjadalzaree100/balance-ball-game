@@ -8,7 +8,7 @@ export const CONFIG = {
   // ── Physics ──────────────────────────────────────────────
   physics: {
     gravity: 100.0,           // Gravity strength (m/s²)
-    friction: 0.08,        // Friction coefficient (0.0 = no friction, 0.1 = full stop)
+    friction: 0.05,        // Friction coefficient (0.0 = no friction, 0.1 = full stop)
     maxTiltAngle: 0.10,     // Maximum tilt angle of the surface 
     tiltSpeed: 0.04,        // Tilt speed when pressing keys
     tiltReturn: 0.92,       // Speed of surface returning to level after releasing keys
