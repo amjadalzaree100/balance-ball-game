@@ -46,38 +46,48 @@ export class PhysicsEngine {
   }
 
   // Update tilt angles from input each frame
-  updateTilt(inputX, inputZ, delta) {
+updateTilt(inputX, inputZ, delta) {
+    // Build raw tilt vector from input
+    let rawTx = this.tiltX;
+    let rawTz = this.tiltZ;
+
     if (inputX !== 0) {
-      this.tiltX += inputX * this.tiltSpeed * delta * 60; // frame-rate independent
+        rawTx += inputX * this.tiltSpeed * delta * 60;
     } else {
-      this.tiltX *= Math.pow(this.tiltReturn, delta * 60);
+        rawTx *= Math.pow(this.tiltReturn, delta * 60);
     }
 
     if (inputZ !== 0) {
-      this.tiltZ += inputZ * this.tiltSpeed * delta * 60;
+        rawTz += inputZ * this.tiltSpeed * delta * 60;
     } else {
-      this.tiltZ *= Math.pow(this.tiltReturn, delta * 60);
+        rawTz *= Math.pow(this.tiltReturn, delta * 60);
     }
 
-    this.tiltX = Math.max(-this.maxTiltAngle, Math.min(this.maxTiltAngle, this.tiltX));
-    this.tiltZ = Math.max(-this.maxTiltAngle, Math.min(this.maxTiltAngle, this.tiltZ));
-  }
+    // Limit the magnitude of the combined tilt vector to maxTiltAngle
+    const mag = Math.sqrt(rawTx * rawTx + rawTz * rawTz);
+    if (mag > this.maxTiltAngle) {
+        const scale = this.maxTiltAngle / mag;
+        rawTx *= scale;
+        rawTz *= scale;
+    }
 
+    this.tiltX = rawTx;
+    this.tiltZ = rawTz;
+}
   // Run one simulation step
-  step(delta) {
+step(delta) {
     if (!this.ballPosition) return;
 
-    this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);    // Calculate acceleration
-    this._clampVelocity();                                                     // Restrict the velocity
-    this.integrationSystem.integrate(this.ballPosition, this.velocity, delta); // Update position based on velocity
-    this.frictionSystem.apply(this.velocity, delta);                          // Apply friction to velocity
+    this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);
+    this.frictionSystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);  
+
+    this._clampVelocity();
+    this.integrationSystem.integrate(this.ballPosition, this.velocity, delta);
 
     if (this.mazeData) {
-      this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);  // Check for and resolve collisions with maze walls and bounds
+        this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);
     }
-  }
-
-  // Cap horizontal speed to terminalVelocity
+}  // Cap horizontal speed to terminalVelocity
   _clampVelocity() {
     const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
     if (speed > this.terminalVelocity) {
