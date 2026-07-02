@@ -1,18 +1,11 @@
-// gravity-system.js — Gravitational acceleration with rolling correction
-import { CONFIG } from '../../core/config.js';   // ← سطر جديد
+import { CONFIG } from '../../core/config.js';  
 
 export class GravitySystem {
-    constructor(gravity = 9.8) {
-        this.gravity = gravity;
+    constructor() {
+        this.gravity = CONFIG.physics.gravity;
         this.rollingFactor = CONFIG.physics.rollingFactor;
     }
 
-/**
-   * a_x = g · sin(θz) · cos(θx) · rollingFactor
-   * a_z = g · sin(θx) · cos(θz) · rollingFactor
-   *
-   * rollingFactor = to account for rolling friction and energy loss
-*/
     apply(velocity, tiltX, tiltZ, delta) {
         const g  = this.gravity;
         const rf = this.rollingFactor;
@@ -24,3 +17,17 @@ export class GravitySystem {
         velocity.z += az * delta;
     }
 }
+
+
+//============================================================
+// Gravity-driven acceleration on inclined planes
+//  Computes the effective acceleration components based on device tilt
+//  angles, simulating a ball rolling on a tilted surface.
+//
+//  Physics model:
+//     a_x = g · sin(θz) · cos(θx) · rollingFactor
+//     a_z = g · sin(θx) · cos(θz) · rollingFactor
+//    
+//    rollingFactor = to account for rolling friction and energy loss
+// ============================================================
+// wreten by amjad

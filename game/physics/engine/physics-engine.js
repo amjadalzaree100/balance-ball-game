@@ -1,4 +1,3 @@
-// physics-engine.js - Main physics engine
 // Delegates to separate systems: gravity, friction, integration, collision
 
 import * as THREE from 'three';
@@ -26,8 +25,8 @@ export class PhysicsEngine {
     this.ballRadius = cfg.ballRadius;
 
     // Independent physics sub-systems
-    this.gravitySystem = new GravitySystem(cfg.gravity);
-    this.frictionSystem = new FrictionSystem(cfg.friction);
+    this.gravitySystem = new GravitySystem();
+    this.frictionSystem = new FrictionSystem();
     this.integrationSystem = new IntegrationSystem();
     this.collisionSystem = new CollisionSystem();
     this.energySystem = new EnergySystem();
@@ -94,12 +93,9 @@ _clampVelocity() {
   const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
   if (speed === 0) return;
 
-  // السقف الديناميكي: يتناسب مع شدة الميلان الحالية
-  // عند ميلان كبير → سقف أعلى
-  // عند ميلان صغير → سقف أخفض
   const tiltMag = Math.sqrt(this.tiltX ** 2 + this.tiltZ ** 2);
   const dynamicCap = this.terminalVelocity * (tiltMag / this.maxTiltAngle);
-  const effectiveCap = Math.max(dynamicCap, 1.0); // حد أدنى 1 لمنع التجميد
+  const effectiveCap = Math.max(dynamicCap, 1.0); 
 
   if (speed > effectiveCap) {
     const ratio = effectiveCap / speed;

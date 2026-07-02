@@ -1,7 +1,3 @@
-// ============================================================
-//  ball-model.js — Pure data model for the ball
-//  No Three.js here — just position, velocity state, and logic
-// ============================================================
 
 import * as THREE from 'three';
 import { CONFIG } from '../../core/config.js';
