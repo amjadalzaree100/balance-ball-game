@@ -118,6 +118,14 @@ function loadLevel() {
   ui.setScore(CONFIG.game.scorePerLevel);
 }
 
+// Ball height on the tilted surface (used for Ep = mgh and fall detection)
+function getBallTiltedY() {
+  const bp = ballCtrl.getPosition();
+  const { tiltX, tiltZ } = physics;
+  const surfaceY = bp.x * Math.sin(tiltZ) - bp.z * Math.sin(tiltX) * Math.cos(tiltZ);
+  return surfaceY + CONFIG.physics.ballRadius;
+}
+
 // ============================================================
 //  Start / Restart helpers
 // ============================================================
@@ -126,14 +134,20 @@ function startGame() {
   loadLevel();
   ui.hideAllScreens();
   ui.startTimer();
-  physics.reset();
+  physics.reset(getBallTiltedY());
+  if (CONFIG.energy.enabled) {
+    ui.updateEnergy(physics.getEnergy(getBallTiltedY()));
+  }
   _scoreTick = 0;
 }
 
 function restartLevel() {
   state = STATE.PLAYING;
   ballCtrl.reset();
-  physics.reset();
+  physics.reset(getBallTiltedY());
+  if (CONFIG.energy.enabled) {
+    ui.updateEnergy(physics.getEnergy(getBallTiltedY()));
+  }
   ui.hideAllScreens();
   ui.startTimer();
   ui.setScore(CONFIG.game.scorePerLevel);
@@ -201,10 +215,7 @@ function update(delta) {
 
   // 5. Calculate real Y position based on surface tilt + ball X/Z
   const bp = ballCtrl.getPosition();
-  const tiltX = physics.tiltX;
-  const tiltZ = physics.tiltZ;
-  const surfaceY = bp.x * Math.sin(tiltZ) - bp.z * Math.sin(tiltX) * Math.cos(tiltZ);
-  const tiltedY = surfaceY + CONFIG.physics.ballRadius;
+  const tiltedY = getBallTiltedY();
 
   // Update ball's world Y (used for fall detection)
   bp.y = tiltedY;
@@ -212,6 +223,10 @@ function update(delta) {
   // Apply to visual meshes
   ballCtrl.renderer.mesh.position.y = tiltedY;
   ballCtrl.renderer.glowMesh.position.y = tiltedY - 0.1;
+
+  if (CONFIG.energy.enabled) {
+    ui.updateEnergy(physics.getEnergy(tiltedY));
+  }
 
   // 6. Animate maze decorations (goal, holes)
   mazeRenderer.update(delta);

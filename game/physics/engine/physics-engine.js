@@ -7,6 +7,7 @@ import { GravitySystem } from '../systems/gravity-system.js';
 import { FrictionSystem } from '../systems/friction-system.js';
 import { IntegrationSystem } from '../systems/integration-system.js';
 import { CollisionSystem } from '../systems/collision-system.js';
+import { EnergySystem } from '../systems/energy-system.js';
 
 export class PhysicsEngine {
 
@@ -29,6 +30,7 @@ export class PhysicsEngine {
     this.frictionSystem = new FrictionSystem(cfg.friction);
     this.integrationSystem = new IntegrationSystem();
     this.collisionSystem = new CollisionSystem();
+    this.energySystem = new EnergySystem();
 
     // Current surface tilt angles (radians)
     this.tiltX = 0;
@@ -97,10 +99,24 @@ step(delta) {
     }
   }
 
-  reset() {
+  reset(height = 0) {
     this.velocity.set(0, 0, 0);
     this.tiltX = 0;
     this.tiltZ = 0;
+    if (CONFIG.energy.enabled) {
+      this.energySystem.reset(this.velocity, height);
+    }
+  }
+
+  getEnergy(height) {
+    const total = this.energySystem.total(this.velocity, height);
+    return {
+      kinetic: this.energySystem.kinetic(this.velocity),
+      potential: this.energySystem.potential(height),
+      total,
+      delta: this.energySystem.getDeltaE(total),
+      initial: this.energySystem.initialEnergy,
+    };
   }
 
 }

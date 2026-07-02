@@ -1,6 +1,6 @@
 // ============================================================
 //  ui.js — Controls all DOM screens and the HUD
-//  Manages: start screen, win/lose screens, score, timer, speed
+//  Manages: start screen, win/lose screens, score, timer, speed, energy
 // ============================================================
 
 import { CONFIG } from '../core/config.js';
@@ -33,6 +33,24 @@ export class UI {
     // Speed display elements
     this._speedEl   = document.getElementById('speed');
     this._speedBar  = document.getElementById('speed-bar');
+
+    // Energy display elements
+    this._energyDisplay  = document.getElementById('energy-display');
+    this._energyTotal    = document.getElementById('energy-total');
+    this._energyKinetic  = document.getElementById('energy-kinetic');
+    this._energyPotential = document.getElementById('energy-potential');
+    this._energyDelta    = document.getElementById('energy-delta');
+    this._energyBreakdown = document.getElementById('energy-breakdown');
+    this._energyBar      = document.getElementById('energy-bar');
+
+    if (!CONFIG.energy.enabled) {
+      this._energyDisplay.style.display = 'none';
+    } else if (!CONFIG.energy.showBreakdown) {
+      this._energyBreakdown.style.display = 'none';
+    }
+    if (!CONFIG.energy.trackInitialEnergy) {
+      this._energyDelta.parentElement.style.display = 'none';
+    }
 
     // Level selector — callback fired when a level button is clicked
     this._pickLevelCallback = null;
@@ -107,6 +125,27 @@ export class UI {
     // Update the speed bar width (% of max speed)
     const percent = Math.min(100, (speed / maxSpeed) * 100);
     this._speedBar.style.width = `${percent}%`;
+  }
+
+  // ── Energy display (الطاقة الميكانيكية) ─────────────────
+  updateEnergy({ kinetic, potential, total, delta, initial }) {
+    if (!CONFIG.energy.enabled) return;
+
+    this._energyTotal.textContent = total.toFixed(1);
+
+    if (CONFIG.energy.showBreakdown) {
+      this._energyKinetic.textContent = kinetic.toFixed(1);
+      this._energyPotential.textContent = potential.toFixed(1);
+      this._energyDelta.textContent = delta.toFixed(1);
+      this._energyDelta.classList.toggle('energy-loss', delta < -0.05);
+    }
+
+    if (initial != null && initial > 0) {
+      const percent = Math.min(100, (total / initial) * 100);
+      this._energyBar.style.width = `${percent}%`;
+    } else {
+      this._energyBar.style.width = '100%';
+    }
   }
 
   // ── Screen visibility ─────────────────────────────────────
