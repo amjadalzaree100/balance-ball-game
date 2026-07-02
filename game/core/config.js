@@ -13,9 +13,9 @@ export const CONFIG = {
     tiltSpeed: 0.04,        // Tilt speed when pressing keys
     tiltReturn: 0.92,       // Speed of surface returning to level after releasing keys
     ballRadius: 0.6,        // Ball radius
-    terminalVelocity: 10,   // Maximum ball speed
     bounceFactor: 0.5,        // Coefficient of restitution (0 = stop, 1 = perfect bounce)
-    rollingFactor: 0.6,   // Factor to reduce acceleration due to rolling friction (  0 = no rolling, 1 = no friction)
+    rollingFactor: 0.9,   // Factor to reduce acceleration due to rolling friction (  0 = no rolling, 1 = no friction)
+    // terminalVelocity: 10,   // Maximum ball speed
   },
 
   // ── Ball ────────────────────────────────────────────────

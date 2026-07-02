@@ -89,16 +89,24 @@ step(delta) {
     if (this.mazeData) {
         this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);
     }
-}  // Cap horizontal speed to terminalVelocity
-  _clampVelocity() {
-    const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
-    if (speed > this.terminalVelocity) {
-      const ratio = this.terminalVelocity / speed;
-      this.velocity.x *= ratio;
-      this.velocity.z *= ratio;
-    }
-  }
+}  
+_clampVelocity() {
+  const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
+  if (speed === 0) return;
 
+  // السقف الديناميكي: يتناسب مع شدة الميلان الحالية
+  // عند ميلان كبير → سقف أعلى
+  // عند ميلان صغير → سقف أخفض
+  const tiltMag = Math.sqrt(this.tiltX ** 2 + this.tiltZ ** 2);
+  const dynamicCap = this.terminalVelocity * (tiltMag / this.maxTiltAngle);
+  const effectiveCap = Math.max(dynamicCap, 1.0); // حد أدنى 1 لمنع التجميد
+
+  if (speed > effectiveCap) {
+    const ratio = effectiveCap / speed;
+    this.velocity.x *= ratio;
+    this.velocity.z *= ratio;
+  }
+}
   reset(height = 0) {
     this.velocity.set(0, 0, 0);
     this.tiltX = 0;
