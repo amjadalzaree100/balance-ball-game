@@ -9,11 +9,11 @@ export class FrictionSystem {
 
   apply(velocity, tiltX, tiltZ, delta) {
     const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2);
-    if (speed < 0.001) return;  // already stationary
+    if (speed < 0.001) return;  
 
     // Friction magnitude = mu * g * cos(tiltX) * cos(tiltZ)
     const cosTilt = Math.cos(tiltX) * Math.cos(tiltZ);
-    const frictionAccel = this.mu * this.gravity * Math.abs(cosTilt);
+    const frictionAccel = this.mu * Math.abs(this.gravity) * Math.abs(cosTilt);
 
     // Maximum friction force that can be applied without reversing velocity
     const frictionDelta = Math.min(frictionAccel * delta, speed);
