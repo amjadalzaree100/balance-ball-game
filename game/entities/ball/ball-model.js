@@ -11,13 +11,10 @@ export class BallModel {
   constructor() {
     const start = CONFIG.ball.startPosition;
 
-    // World-space position (shared reference with physics engine)
     this.position = new THREE.Vector3(start.x, start.y, start.z);
 
-    // Current roll rotation (visual only, updated each frame)
     this.rotation = new THREE.Euler(0, 0, 0);
 
-    // Accumulated rotation quaternion for smooth rolling
     this._rollQuat = new THREE.Quaternion();
 
     this.radius   = CONFIG.physics.ballRadius;
@@ -25,19 +22,21 @@ export class BallModel {
   }
 
   // Update visual roll rotation based on velocity
-  // Rolling = rotating around the axis perpendicular to movement direction
-  updateRoll(velocityX, velocityZ, delta) {
-    const speed  = Math.sqrt(velocityX ** 2 + velocityZ ** 2);
-    if (speed < 0.001) return;
+updateRoll(velocityX, velocityZ, delta) {
+  const speed = Math.sqrt(velocityX ** 2 + velocityZ ** 2);
+  if (speed < 0.001) return;
 
-    // Roll axis is perpendicular to the movement direction
-    const axis = new THREE.Vector3(-velocityZ, 0, velocityX).normalize();
-    const angle = -(speed * delta) / this.radius;
+  const axis = new THREE.Vector3(-velocityZ, 0, velocityX).normalize();
 
-    const deltaQuat = new THREE.Quaternion();
-    deltaQuat.setFromAxisAngle(axis, angle);
-    this._rollQuat.premultiply(deltaQuat);
-  }
+  //  ω = v / r
+  const omega = speed / this.radius;     
+  const angle = -(omega * delta);           
+
+  const deltaQuat = new THREE.Quaternion();
+  deltaQuat.setFromAxisAngle(axis, angle);
+  this._rollQuat.premultiply(deltaQuat);
+}
+
 
   // Reset ball to starting position
   reset() {
