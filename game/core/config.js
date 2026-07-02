@@ -7,15 +7,16 @@ export const CONFIG = {
 
   // ── Physics ──────────────────────────────────────────────
   physics: {
-    gravity: 100.0,           // Gravity strength (m/s²)
-    friction: 0.05,        // Friction coefficient (0.0 = no friction, 0.1 = full stop)  / μk
-    frictionStatic: 0.08,    // Static friction coefficient (0.0 = no friction, 0.1 = full stop) / μs // (must be > friction)
-    maxTiltAngle: 0.10,     // Maximum tilt angle of the surface 
-    tiltSpeed: 0.04,        // Tilt speed when pressing keys
-    tiltReturn: 0.92,       // Speed of surface returning to level after releasing keys
-    ballRadius: 0.6,        // Ball radius
-    bounceFactor: 0.5,        // Coefficient of restitution (0 = stop, 1 = perfect bounce)
-    rollingFactor: 0.9,   // Factor to reduce acceleration due to rolling friction (  0 = no rolling, 1 = no friction)
+    gravity: 100.0,            // Gravity strength (m/s²)
+    friction: 0.05,            // Friction coefficient (0.0 = no friction, 0.1 = full stop)  / μk
+    frictionStatic: 0.08,      // Static friction coefficient (0.0 = no friction, 0.1 = full stop) / μs // (must be > friction)
+    viscousFriction: 0.1,      // Viscous drag coefficient (0.0 = no drag, 1.0 = strong drag)
+    maxTiltAngle: 0.10,        // Maximum tilt angle of the surface 
+    tiltSpeed: 0.04,           // Tilt speed when pressing keys
+    tiltReturn: 0.92,          // Speed of surface returning to level after releasing keys
+    ballRadius: 0.6,           // Ball radius
+    bounceFactor: 0.5,         // Coefficient of restitution (0 = stop, 1 = perfect bounce)
+    rollingFactor: 0.9,        // Factor to reduce acceleration due to rolling friction (  0 = no rolling, 1 = no friction)
     // terminalVelocity: 10,   // Maximum ball speed
   },
 

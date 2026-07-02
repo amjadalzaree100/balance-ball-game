@@ -5,6 +5,7 @@ export class FrictionSystem {
   constructor(mu = 0.05) {
     this.mu       = CONFIG.physics.friction;
     this.muStatic = CONFIG.physics.frictionStatic;
+    this.kViscous = CONFIG.physics.viscousFriction;
     this.gravity  = CONFIG.physics.gravity;
   }
 
@@ -32,7 +33,7 @@ export class FrictionSystem {
       return;
     }
 
-    // ── Kinetic friction ──────────────────────────────────────
+    // ── Kinetic (dry) friction ──────────────────────────────────────
     // F_k = μk * N 
     const frictionAccel = this.mu * N;
     const frictionDelta = Math.min(frictionAccel * delta, speed);
@@ -44,6 +45,15 @@ export class FrictionSystem {
     velocity.x -= dirX * frictionDelta;
     velocity.z -= dirZ * frictionDelta;
 
+    // ── Viscous drag    ───────────────────────────────
+    if (this.kViscous > 0) {
+      // Exponential decay factor: exp(-k * dt)
+      const decay = Math.exp(-this.kViscous * delta);
+      velocity.x *= decay;
+      velocity.z *= decay;
+    }
+
+        // ── Dead-zone for negligible speeds ───────────────────────
     if (Math.sqrt(velocity.x ** 2 + velocity.z ** 2) < 0.001) {
       velocity.set(0, 0, 0);
     }
@@ -59,6 +69,8 @@ export class FrictionSystem {
 //          and the driving force is too weak to overcome the threshold.
 //  Kinetic friction (μk): opposes motion once the ball is already moving,
 //          decelerating it at a constant rate regardless of speed.
+//  Viscous drag (kViscous): adds exponential decay to velocity,
+//          simulating air resistance or lubricated surfaces.
 //
 // ============================================================
-// wreten by amjad 
+// written by amjad
