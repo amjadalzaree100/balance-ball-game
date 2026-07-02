@@ -7,7 +7,7 @@ export const CONFIG = {
 
   // ── Physics ──────────────────────────────────────────────
   physics: {
-    gravity: 100.0,           // Gravity strength (m/s²)
+    gravity: 10.0,           // Gravity strength (m/s²)
     friction: 0.05,        // Friction coefficient (0.0 = no friction, 0.1 = full stop)
     maxTiltAngle: 0.10,     // Maximum tilt angle of the surface 
     tiltSpeed: 0.04,        // Tilt speed when pressing keys
@@ -55,13 +55,21 @@ export const CONFIG = {
     pointLightIntensity: 2,
   },
 
-  // ── Game ───────────────────────────────────────────────
+  // ── Game ──────────────────────────────────────────────────
   game: {
     fallThreshold: -5,      // Height below which the ball is considered fallen
     goalRadius: 0.6,        // Goal area radius
     scorePerLevel: 500,    // Base points for completing the level
     timePenalty: 10,         // Points deducted per second
   },
-  
+
+  // ── Mechanical Energy ────────────────────────────────────
+  energy: {
+    enabled: true,            // Show energy panel on HUD
+    ballMass: 1.0,            // m (kg) — used in Ek = ½mv² and Ep = mgh
+    referenceHeight: 0,       // h = 0 at this Y level (maze floor center)
+    showBreakdown: true,      // Show Ek, Ep, and ΔE separately
+    trackInitialEnergy: true, // Track E₀ at level start (ΔE < 0 with friction)
+  },
 
 };
