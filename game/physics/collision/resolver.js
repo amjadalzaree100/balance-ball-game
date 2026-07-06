@@ -18,7 +18,7 @@ export class CollisionResolver {
     switch (axis) {
       case 'left':
         ballPos.x  = minX - r;
-        velocity.x = Math.abs(velocity.x) * -this.bounceFactor;
+        velocity.x = Math.abs(velocity.x) * this.bounceFactor;
         break;
       case 'right':
         ballPos.x  = maxX + r;
@@ -26,7 +26,7 @@ export class CollisionResolver {
         break;
       case 'top':
         ballPos.z  = minZ - r;
-        velocity.z = Math.abs(velocity.z) * -this.bounceFactor;
+        velocity.z = Math.abs(velocity.z) * this.bounceFactor;
         break;
       case 'bottom':
         ballPos.z  = maxZ + r;
