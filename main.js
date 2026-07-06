@@ -22,6 +22,8 @@ import { MazeRenderer } from './game/entities/maze/maze-renderer.js';
 
 import { LevelManager } from './game/levels/level-manager.js';
 import { UI } from './game/ui/ui.js';
+import { PhysicsPanel } from './game/ui/physics-panel/physics-panel.js';
+import { ForceVectors } from './game/ui/physics-panel/force-vectors.js';
 
 // Game state enum
 const STATE = { IDLE: 'IDLE', PLAYING: 'PLAYING', WIN: 'WIN', LOSE: 'LOSE' };
@@ -43,6 +45,12 @@ const ui = new UI();
 const mazeModel = new MazeModel();
 const mazeRenderer = new MazeRenderer(sceneManager.scene);
 const ballCtrl = new BallController(sceneManager.scene, physics);
+const forceVectors = new ForceVectors(sceneManager.scene);
+const physicsPanel = new PhysicsPanel({
+  physics,
+  ballController: ballCtrl,
+  forceVectors,
+});
 
 // Current state
 let state = STATE.IDLE;
@@ -211,6 +219,11 @@ function update(delta) {
   ballCtrl.update(delta);
   const speed = Math.sqrt(physics.velocity.x ** 2 + physics.velocity.z ** 2);
   ui.updateSpeed(speed);
+
+  // 4b. Update 3D force arrows if enabled
+  if (CONFIG.physics.showVectors) {
+    forceVectors.update(ballCtrl.getPosition(), physics.velocity, physics.tiltX, physics.tiltZ);
+  }
 
 
   // 5. Calculate real Y position based on surface tilt + ball X/Z

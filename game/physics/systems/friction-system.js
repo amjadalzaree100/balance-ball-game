@@ -3,29 +3,29 @@ import { CONFIG } from '../../core/config.js';
 export class FrictionSystem {
 
   constructor(mu = 0.05) {
-    this.mu       = CONFIG.physics.friction;
-    this.muStatic = CONFIG.physics.frictionStatic;
-    this.kViscous = CONFIG.physics.viscousFriction;
-    this.gravity  = CONFIG.physics.gravity;
+    // No state — all values are read from CONFIG in apply()
   }
 
   apply(velocity, tiltX, tiltZ, delta) {
     const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2);
-    const g     = Math.abs(this.gravity);
+    const gRaw  = CONFIG.physics.gravity;
+    const g     = Math.abs(gRaw);
 
-    // Normal force component: N = mg * cos(θx) * cos(θz)
+    // Normal force component: N = |g| · cos(θx) · cos(θz)
     const cosTilt = Math.cos(tiltX) * Math.cos(tiltZ);
     const N       = g * Math.abs(cosTilt);
 
-    // ── Static friction check ─────────────────────────────────
-    //   driving = g * sqrt(sin²(θx) + sin²(θz))
+    // ── Static friction check ─────────────────────────────
+    // Ball stays still if |g · sin(θ)| < μs · N.
+    // Using |g| (not signed g) keeps the check symmetric in worlds
+    // where gravity is inverted.
     if (speed < 0.001) {
       const sinX        = Math.sin(tiltX);
       const sinZ        = Math.sin(tiltZ);
-      const drivingAccel   = g * Math.sqrt(sinX ** 2 + sinZ ** 2);
-      const staticThreshold = this.muStatic * N;
+      const drivingAccel   = gRaw * Math.sqrt(sinX ** 2 + sinZ ** 2);
+      const staticThreshold = CONFIG.physics.frictionStatic * N;
 
-      if (drivingAccel < staticThreshold) {
+      if (Math.abs(drivingAccel) < staticThreshold) {
         // Driving force is too weak — ball stays still.
         velocity.set(0, 0, 0);
         return;
@@ -34,8 +34,8 @@ export class FrictionSystem {
     }
 
     // ── Kinetic (dry) friction ──────────────────────────────────────
-    // F_k = μk * N 
-    const frictionAccel = this.mu * N;
+    // F_k = μk * N
+    const frictionAccel = CONFIG.physics.friction * N;
     const frictionDelta = Math.min(frictionAccel * delta, speed);
 
     // Unit vector in the direction of current motion
@@ -46,9 +46,9 @@ export class FrictionSystem {
     velocity.z -= dirZ * frictionDelta;
 
     // ── Viscous drag    ───────────────────────────────
-    if (this.kViscous > 0) {
+    if (CONFIG.physics.viscousFriction > 0) {
       // Exponential decay factor: exp(-k * dt)
-      const decay = Math.exp(-this.kViscous * delta);
+      const decay = Math.exp(-CONFIG.physics.viscousFriction * delta);
       velocity.x *= decay;
       velocity.z *= decay;
     }

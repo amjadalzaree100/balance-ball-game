@@ -5,7 +5,8 @@ import { CONFIG } from '../../core/config.js';
 export class CollisionResolver {
 
   constructor() {
-    this.bounceFactor = CONFIG.physics.bounceFactor;   
+    // No cached constants — bounceFactor is read from CONFIG per
+    // resolve() call so the Physics Lab panel can mutate it live.
   }
 
   // Push ball outside the wall and partially reflect its velocity.
@@ -18,19 +19,19 @@ export class CollisionResolver {
     switch (axis) {
       case 'left':
         ballPos.x  = minX - r;
-        velocity.x = Math.abs(velocity.x) * this.bounceFactor;
+        velocity.x = -velocity.x * CONFIG.physics.bounceFactor;
         break;
       case 'right':
         ballPos.x  = maxX + r;
-        velocity.x = -Math.abs(velocity.x) * this.bounceFactor;
+        velocity.x = -velocity.x * CONFIG.physics.bounceFactor;
         break;
       case 'top':
         ballPos.z  = minZ - r;
-        velocity.z = Math.abs(velocity.z) * this.bounceFactor;
+        velocity.z = -velocity.z * CONFIG.physics.bounceFactor;
         break;
       case 'bottom':
         ballPos.z  = maxZ + r;
-        velocity.z = -Math.abs(velocity.z) * this.bounceFactor;
+        velocity.z = -velocity.z * CONFIG.physics.bounceFactor;
         break;
     }
   }

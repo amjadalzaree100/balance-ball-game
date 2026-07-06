@@ -18,11 +18,11 @@ export class PhysicsEngine {
     this.ballPosition = null;
     this.mazeData = null;
 
+    // Tilt params (tiltSpeed / tiltReturn / maxTiltAngle) and ballRadius are
+    // read from CONFIG per frame in updateTilt() / step() / _clampVelocity()
+    // so the Physics Lab panel can mutate them live. We only cache
+    // terminalVelocity here because it's a stable runtime cap, not a knob.
     this.terminalVelocity = cfg.terminalVelocity;
-    this.tiltSpeed = cfg.tiltSpeed;
-    this.tiltReturn = cfg.tiltReturn;
-    this.maxTiltAngle = cfg.maxTiltAngle;
-    this.ballRadius = cfg.ballRadius;
 
     // Independent physics sub-systems
     this.gravitySystem = new GravitySystem();
@@ -48,26 +48,31 @@ export class PhysicsEngine {
 
   // Update tilt angles from input each frame
 updateTilt(inputX, inputZ, delta) {
+    // Read live from CONFIG so the Physics Lab panel can adjust tilt feel
+    const tiltSpeed   = CONFIG.physics.tiltSpeed;
+    const tiltReturn  = CONFIG.physics.tiltReturn;
+    const maxTilt     = CONFIG.physics.maxTiltAngle;
+
     // Build raw tilt vector from input
     let rawTx = this.tiltX;
     let rawTz = this.tiltZ;
 
     if (inputX !== 0) {
-        rawTx += inputX * this.tiltSpeed * delta * 60;
+        rawTx += inputX * tiltSpeed * delta * 60;
     } else {
-        rawTx *= Math.pow(this.tiltReturn, delta * 60);
+        rawTx *= Math.pow(tiltReturn, delta * 60);
     }
 
     if (inputZ !== 0) {
-        rawTz += inputZ * this.tiltSpeed * delta * 60;
+        rawTz += inputZ * tiltSpeed * delta * 60;
     } else {
-        rawTz *= Math.pow(this.tiltReturn, delta * 60);
+        rawTz *= Math.pow(tiltReturn, delta * 60);
     }
 
     // Limit the magnitude of the combined tilt vector to maxTiltAngle
     const mag = Math.sqrt(rawTx * rawTx + rawTz * rawTz);
-    if (mag > this.maxTiltAngle) {
-        const scale = this.maxTiltAngle / mag;
+    if (mag > maxTilt) {
+        const scale = maxTilt / mag;
         rawTx *= scale;
         rawTz *= scale;
     }
@@ -79,14 +84,25 @@ updateTilt(inputX, inputZ, delta) {
 step(delta) {
     if (!this.ballPosition) return;
 
-    this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);
-    this.frictionSystem.apply(this.velocity, this.tiltX, this.tiltZ, delta);  
+    // Sub-step to prevent tunneling at high speed.
+    // At 60 FPS and a max speed of 30 m/s (from terminalVelocity), one
+    // sub-step of 1/240s = 4 per frame = 30 × 1/240 = 0.125m, well
+    // below the 0.5m thinnest wall. At higher FPS or with more aggressive
+    // presets, this is still safe.
+    const MAX_SUBSTEP_DT = 1 / 240;
+    const numSubsteps = Math.max(1, Math.ceil(delta / MAX_SUBSTEP_DT));
+    const subDelta = delta / numSubsteps;
 
-    this._clampVelocity();
-    this.integrationSystem.integrate(this.ballPosition, this.velocity, delta);
+    for (let i = 0; i < numSubsteps; i++) {
+      this.gravitySystem.apply(this.velocity, this.tiltX, this.tiltZ, subDelta);
+      this.frictionSystem.apply(this.velocity, this.tiltX, this.tiltZ, subDelta);
 
-    if (this.mazeData) {
+      this._clampVelocity();
+      this.integrationSystem.integrate(this.ballPosition, this.velocity, subDelta);
+
+      if (this.mazeData) {
         this.collisionSystem.resolveAll(this.ballPosition, this.velocity, this.mazeData);
+      }
     }
 }  
 _clampVelocity() {
@@ -94,7 +110,7 @@ _clampVelocity() {
   if (speed === 0) return;
 
   const tiltMag = Math.sqrt(this.tiltX ** 2 + this.tiltZ ** 2);
-  const dynamicCap = this.terminalVelocity * (tiltMag / this.maxTiltAngle);
+  const dynamicCap = this.terminalVelocity * (tiltMag / CONFIG.physics.maxTiltAngle);
   const effectiveCap = Math.max(dynamicCap, 1.0); 
 
   if (speed > effectiveCap) {
