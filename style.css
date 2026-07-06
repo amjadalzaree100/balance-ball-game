@@ -492,6 +492,12 @@ body::after {
   color: var(--cyan);
   box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
 }
+
+/* When the physics panel is open, push the mic button left of the
+   drawer so it doesn't sit on top of the Reset-to-Defaults button. */
+body.physics-panel-open #mic-btn {
+  right: calc(340px + 28px);  /* 340 = drawer width, 28 = original right offset */
+}
  
 /* Active state: button pulses red to show it is recording */
 #mic-btn.active {
@@ -531,5 +537,323 @@ body::after {
 }
 #voice-feedback.voice-fade {
   animation: voiceFadeOut 2s var(--ease) forwards;
+}
+
+/* ============================================================
+   Physics Lab panel (right-edge drawer)
+   ============================================================ */
+
+/* Container — fixed to the right edge, full height, slide-in */
+.physics-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.04),
+              -20px 0 60px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-family: var(--font-ui);
+  transition: transform 0.3s var(--ease);
+  overflow: hidden;
+}
+.physics-panel.collapsed {
+  transform: translateX(100%);
+  box-shadow: none;
+}
+
+/* Toggle button (⚙) — always visible, slides with panel.
+   Initial right offset is set in JS (syncToggle()) once the panel mounts. */
+.physics-panel-toggle {
+  position: fixed;
+  right: 356px;  /* panel is open by default; syncToggle() updates this on collapse/expand */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 16;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--cyan);
+  font-size: 18px;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right 0.3s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+  text-shadow: 0 0 8px var(--cyan);
+  box-shadow: 0 0 0 0 transparent;
+}
+.physics-panel-toggle:hover {
+  border-color: var(--cyan);
+  color: #fff;
+  box-shadow: 0 0 16px var(--cyan-glow);
+}
+
+/* Header */
+.physics-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-shrink: 0;
+}
+.physics-panel-title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px var(--cyan);
+  margin: 0;
+}
+.physics-panel-vectors {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+.physics-panel-vectors input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+
+/* Preset pills */
+.physics-panel-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.physics-panel-preset {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.physics-panel-preset:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+.physics-panel-preset.active {
+  background: var(--cyan-dim);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.physics-panel-preset-custom::after {
+  content: "•";
+  color: var(--gold);
+  margin-left: 5px;
+  text-shadow: 0 0 6px var(--gold);
+  font-size: 14px;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+/* Scrollable body */
+.physics-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 16px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.physics-panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+.physics-panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.physics-panel-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.physics-panel-section {
+  margin-top: 10px;
+}
+.physics-panel-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+  font-weight: 400;
+}
+
+/* Single knob row */
+.physics-panel-knob {
+  padding: 4px 0 8px;
+}
+.physics-panel-knob-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.physics-panel-knob-label {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.physics-panel-num {
+  width: 72px;
+  padding: 3px 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: right;
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+  -moz-appearance: textfield;
+}
+.physics-panel-num::-webkit-outer-spin-button,
+.physics-panel-num::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.physics-panel-num:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.physics-panel-unit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  min-width: 32px;
+}
+
+/* Range slider — track + cyan thumb */
+.physics-panel-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+  margin: 2px 0 1px;
+  display: block;
+}
+.physics-panel-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+.physics-panel-slider::-moz-range-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  border: none;
+}
+.physics-panel-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+  margin-top: -5px;
+  transition: box-shadow 0.2s var(--ease);
+  border: none;
+}
+.physics-panel-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+  border: none;
+  cursor: pointer;
+}
+.physics-panel-slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 14px var(--cyan);
+}
+.physics-panel-slider:hover::-moz-range-thumb {
+  box-shadow: 0 0 14px var(--cyan);
+}
+
+.physics-panel-formula {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer (reset buttons) */
+.physics-panel-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.physics-panel-footer button {
+  flex: 1;
+  padding: 8px 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.physics-panel-footer button:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+.physics-panel-footer button:active {
+  transform: translateY(1px);
 }
  

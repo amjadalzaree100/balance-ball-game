@@ -141,6 +141,26 @@
             </button>
         </div>
 
+        <!-- Physics Lab panel (right-edge drawer) -->
+        <button id="physics-panel-toggle" class="physics-panel-toggle" title="Toggle physics panel" aria-label="Toggle physics panel">⚙</button>
+        <aside id="physics-panel" class="physics-panel" aria-label="Physics Lab">
+            <header class="physics-panel-header">
+                <h2 class="physics-panel-title">Physics Lab</h2>
+                <label class="physics-panel-vectors">
+                    <input type="checkbox" id="show-vectors"> Show Vectors
+                </label>
+            </header>
+
+            <div class="physics-panel-presets" id="physics-panel-presets"></div>
+
+            <div class="physics-panel-body"></div>
+
+            <footer class="physics-panel-footer">
+                <button id="physics-reset-ball" type="button" title="Reset ball to start position">↺ Reset Ball</button>
+                <button id="physics-reset-defaults" type="button" title="Reset all knobs to defaults">⟲ Reset to Defaults</button>
+            </footer>
+        </aside>
+
         <script type="module" src="main.js"></script>
     </body>
 </html>

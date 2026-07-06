@@ -1,14 +1,13 @@
-import { CONFIG } from '../../core/config.js';  
+import { CONFIG } from '../../core/config.js';
 
 export class GravitySystem {
     constructor() {
-        this.gravity = CONFIG.physics.gravity;
-        this.rollingFactor = CONFIG.physics.rollingFactor;
+        // No state — gravity and rollingFactor are read from CONFIG per call
     }
 
     apply(velocity, tiltX, tiltZ, delta) {
-        const g  = this.gravity;
-        const rf = this.rollingFactor;
+        const g  = CONFIG.physics.gravity;
+        const rf = CONFIG.physics.rollingFactor;
 
         const ax = g * Math.sin(tiltZ) * Math.cos(tiltX) * rf;
         velocity.x -= ax * delta;
