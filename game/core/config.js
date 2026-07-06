@@ -22,7 +22,7 @@ export const CONFIG = {
 
   // ── Ball ────────────────────────────────────────────────
   ball: {
-    startPosition: { x: 0, y: 1, z: 0 },  // Start position
+    startPosition: { x: 0, y: 0.6, z: 0 },  // Start position
     color: 0xffffff,
     metalness: 0.9,
     roughness: 0.1,
