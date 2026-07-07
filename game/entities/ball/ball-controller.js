@@ -3,6 +3,7 @@
 //  Bridges the physics engine output → visual update
 // ============================================================
 
+import { CONFIG } from '../../core/config.js';
 import { BallModel }    from './ball-model.js';
 import { BallRenderer } from './ball-renderer.js';
 
@@ -39,6 +40,13 @@ export class BallController {
     this.model.reset();
     this.physics.reset();
     this.physics.setBall(this.model.position);
+  }
+
+  applyBallPreset(preset) {
+    const r = preset.physics.ballRadius;
+    CONFIG.physics.ballRadius = r;
+    this.model.setRadius(r);
+    this.renderer.applyPreset(preset);
   }
 
   dispose() {

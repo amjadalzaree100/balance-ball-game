@@ -1,13 +1,17 @@
 // ============================================================
 //  physics-panel.js — "Physics Lab" right-edge drawer
-//  Exposes 10 physics knobs, 5 presets, two reset actions,
-//  and a 3D vector toggle.  All knob changes apply live — no
-//  Apply button, no pause.  Panel is open by default and
-//  visible on every game state.
+//  Exposes physics knobs, environment presets, ball-type presets,
+//  two reset actions, and a 3D vector toggle.
 // ============================================================
 
 import { CONFIG } from '../../core/config.js';
 import { PRESETS, PRESET_ORDER, PRESET_KEYS } from './presets.js';
+import {
+  BALL_PRESETS,
+  BALL_PRESET_ORDER,
+  BALL_PRESET_KEYS,
+  BALL_PRESET_CONFIG_PATH,
+} from './ball-presets.js';
 
 // ── Knob spec ───────────────────────────────────────────────
 //   configPath: which CONFIG sub-object the value lives in
@@ -22,6 +26,11 @@ const KNOBS = {
     label: 'ball mass', min: 0.01, max: 10, step: 0.01, unit: 'kg',
     formula: 'Ek = ½mv², Ep = m·g·h',
     configPath: 'energy',
+  },
+  ballRadius: {
+    label: 'ball radius', min: 0.15, max: 0.80, step: 0.01, unit: 'm',
+    formula: 'collision + roll ω = v/r',
+    configPath: 'physics',
   },
   friction: {
     label: 'friction (μk)', min: -0.30, max: 0.30, step: 0.001, unit: '',
@@ -66,7 +75,7 @@ const KNOBS = {
 };
 
 const SECTIONS = [
-  { title: 'Gravity',      keys: ['gravity', 'ballMass'] },
+  { title: 'Gravity',      keys: ['gravity', 'ballMass', 'ballRadius'] },
   { title: 'Friction',     keys: ['friction', 'frictionStatic', 'viscousFriction', 'rollingFactor'] },
   { title: 'Tilt & Input', keys: ['maxTiltAngle', 'tiltSpeed', 'tiltReturn'] },
   { title: 'Collision',    keys: ['bounceFactor'] },
@@ -92,10 +101,13 @@ export class PhysicsPanel {
     this._ballController = ballController;
     this._forceVectors = forceVectors;
     this.activePreset = 'earth';
+    this.activeBallPreset = 'classic';
     this._tweenId = 0;
+    this._ballTweenId = 0;
 
     this._rows = {};      // key → { slider, num, spec }
     this._presets = {};   // preset id → <button>
+    this._ballPresets = {}; // ball preset id → <button>
 
     this._buildDom();
     this._syncFromConfig();
@@ -107,6 +119,7 @@ export class PhysicsPanel {
     this._wireVectorToggle();
     // Highlight the default (Earth) preset on first paint
     this._syncActivePresetClass();
+    this._syncActiveBallPresetClass();
   }
 
   _snapshotConfig() {
@@ -149,6 +162,16 @@ export class PhysicsPanel {
     if (document.activeElement !== num)    num.value    = formatValue(value);
   }
 
+  _readBallConfig(key) {
+    const path = BALL_PRESET_CONFIG_PATH[key];
+    return CONFIG[path][key];
+  }
+
+  _writeBallConfig(key, value) {
+    const path = BALL_PRESET_CONFIG_PATH[key];
+    CONFIG[path][key] = value;
+  }
+
   // ── Shared tween (used by presets and Reset to Defaults) ──
   // Animates CONFIG[key] from its current value to targets[key] over
   // `duration` ms with ease-in-out. Cancels any in-flight tween via
@@ -176,6 +199,34 @@ export class PhysicsPanel {
         keys.forEach((k) => {
           this._writeConfig(k, targets[k]);
           this._updateRowUI(k, targets[k]);
+        });
+        if (onComplete) onComplete();
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  _tweenBallTo(targets, keys, duration = 300, onComplete) {
+    const myTweenId = ++this._ballTweenId;
+    const fromValues = {};
+    keys.forEach((k) => { fromValues[k] = this._readBallConfig(k); });
+
+    const start = performance.now();
+    const step = () => {
+      if (myTweenId !== this._ballTweenId) return;
+      const t = Math.min(1, (performance.now() - start) / duration);
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      keys.forEach((k) => {
+        const v = fromValues[k] + (targets[k] - fromValues[k]) * eased;
+        this._writeBallConfig(k, v);
+        if (this._rows[k]) this._updateRowUI(k, v);
+      });
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        keys.forEach((k) => {
+          this._writeBallConfig(k, targets[k]);
+          if (this._rows[k]) this._updateRowUI(k, targets[k]);
         });
         if (onComplete) onComplete();
       }
@@ -264,6 +315,43 @@ export class PhysicsPanel {
       presetsEl.appendChild(btn);
       this._presets[id] = btn;
     }
+
+    // Ball type cards
+    const ballPresetsEl = root.querySelector('#physics-panel-ball-presets');
+    if (ballPresetsEl) {
+      ballPresetsEl.innerHTML = '';
+      for (const id of BALL_PRESET_ORDER) {
+        const preset = BALL_PRESETS[id];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'physics-panel-ball-preset';
+        btn.dataset.ballPreset = id;
+        btn.style.setProperty('--ball-accent', preset.accent);
+
+        const icon = document.createElement('span');
+        icon.className = 'physics-panel-ball-icon';
+        icon.textContent = preset.icon;
+        btn.appendChild(icon);
+
+        const info = document.createElement('span');
+        info.className = 'physics-panel-ball-info';
+
+        const name = document.createElement('span');
+        name.className = 'physics-panel-ball-name';
+        name.textContent = preset.name;
+        info.appendChild(name);
+
+        const tag = document.createElement('span');
+        tag.className = 'physics-panel-ball-tag';
+        tag.textContent = preset.tagline;
+        info.appendChild(tag);
+
+        btn.appendChild(info);
+        btn.addEventListener('click', () => this._applyBallPreset(id));
+        ballPresetsEl.appendChild(btn);
+        this._ballPresets[id] = btn;
+      }
+    }
   }
 
   // ── Per-row wiring (slider ↔ number input ↔ CONFIG) ───────
@@ -275,6 +363,14 @@ export class PhysicsPanel {
       v = clamp(parseFloat(v), spec.min, spec.max);
       if (Number.isNaN(v)) return;
       CONFIG[spec.configPath][key] = v;
+      if (key === 'ballRadius' && this._ballController) {
+        this._ballController.model.setRadius(v);
+        const active = BALL_PRESETS[this.activeBallPreset];
+        if (active) this._ballController.renderer.applyPreset({
+          ...active,
+          physics: { ...active.physics, ballRadius: v },
+        });
+      }
       // Mirror value to both controls without re-firing events
       if (document.activeElement !== slider) slider.value = v;
       if (document.activeElement !== num)    num.value    = formatValue(v);
@@ -303,6 +399,9 @@ export class PhysicsPanel {
   _handlePostChange(changedKey) {
     if (changedKey === 'friction' || changedKey === 'frictionStatic') {
       this._applyFrictionClamp(changedKey);
+    }
+    if (BALL_PRESET_KEYS.includes(changedKey)) {
+      this._refreshBallCustomBadge();
     }
     this._refreshCustomBadge();
   }
@@ -338,6 +437,58 @@ export class PhysicsPanel {
     // Show Vectors checkbox
     const cb = document.getElementById('show-vectors');
     if (cb) cb.checked = !!CONFIG.physics.showVectors;
+  }
+
+  // ── Ball presets ──────────────────────────────────────────
+  _applyBallPreset(id) {
+    if (!BALL_PRESETS[id] || !this._ballController) return;
+    const preset = BALL_PRESETS[id];
+    this.activeBallPreset = id;
+    this._syncActiveBallPresetClass();
+
+    // Radius + visuals apply immediately so collision matches the mesh
+    this._ballController.applyBallPreset(preset);
+
+    const tweenKeys = BALL_PRESET_KEYS.filter((k) => k !== 'ballRadius');
+    const targets = {};
+    tweenKeys.forEach((k) => { targets[k] = preset.physics[k]; });
+
+    // Snap radius UI immediately; tween the rest of the physics knobs
+    if (this._rows.ballRadius) {
+      this._updateRowUI('ballRadius', preset.physics.ballRadius);
+    }
+
+    this._tweenBallTo(targets, tweenKeys, 300, () => {
+      this._refreshBallCustomBadge();
+      this._refreshCustomBadge();
+    });
+    this._refreshBallCustomBadge();
+  }
+
+  _refreshBallCustomBadge() {
+    Object.values(this._ballPresets).forEach((btn) => {
+      btn.classList.remove('physics-panel-ball-preset-custom');
+    });
+    if (this._isActiveBallPresetCustom()) {
+      const active = this._ballPresets[this.activeBallPreset];
+      if (active) active.classList.add('physics-panel-ball-preset-custom');
+    }
+  }
+
+  _isActiveBallPresetCustom() {
+    if (!this.activeBallPreset || !BALL_PRESETS[this.activeBallPreset]) return false;
+    const EPS = 0.005;
+    const presetVals = BALL_PRESETS[this.activeBallPreset].physics;
+    for (const key of BALL_PRESET_KEYS) {
+      if (Math.abs(this._readBallConfig(key) - presetVals[key]) > EPS) return true;
+    }
+    return false;
+  }
+
+  _syncActiveBallPresetClass() {
+    Object.entries(this._ballPresets).forEach(([id, btn]) => {
+      btn.classList.toggle('active', id === this.activeBallPreset);
+    });
   }
 
   // ── Presets ───────────────────────────────────────────────
@@ -419,9 +570,13 @@ export class PhysicsPanel {
     if (resetDefaults) {
       resetDefaults.addEventListener('click', () => {
         this.activePreset = 'earth';
+        this.activeBallPreset = 'classic';
+        this._ballController.applyBallPreset(BALL_PRESETS.classic);
         this._tweenTo(this._defaults, Object.keys(this._rows), 300, () => {
           this._refreshCustomBadge();
+          this._refreshBallCustomBadge();
           this._syncActivePresetClass();
+          this._syncActiveBallPresetClass();
         });
       });
     }

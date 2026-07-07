@@ -642,11 +642,18 @@ body.physics-panel-open #mic-btn {
 }
 
 /* Preset pills */
+.physics-panel-env-section {
+  padding: 10px 16px 0;
+  flex-shrink: 0;
+}
+.physics-panel-env-section .physics-panel-section-title {
+  margin-bottom: 8px;
+}
 .physics-panel-presets {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 10px 16px;
+  padding: 0 0 10px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -682,6 +689,79 @@ body.physics-panel-open #mic-btn {
   font-size: 14px;
   line-height: 0;
   vertical-align: middle;
+}
+
+/* Ball type presets */
+.physics-panel-ball-section {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.physics-panel-ball-section .physics-panel-section-title {
+  margin-bottom: 8px;
+}
+.physics-panel-ball-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.physics-panel-ball-preset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s var(--ease);
+  position: relative;
+}
+.physics-panel-ball-preset:hover {
+  border-color: var(--ball-accent, var(--cyan));
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--ball-accent, var(--cyan)) 25%, transparent);
+}
+.physics-panel-ball-preset.active {
+  border-color: var(--ball-accent, var(--cyan));
+  background: color-mix(in srgb, var(--ball-accent, var(--cyan)) 12%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ball-accent, var(--cyan)) 30%, transparent);
+}
+.physics-panel-ball-preset-custom::after {
+  content: "•";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: var(--gold);
+  text-shadow: 0 0 6px var(--gold);
+  font-size: 14px;
+}
+.physics-panel-ball-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.physics-panel-ball-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.physics-panel-ball-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.physics-panel-ball-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Scrollable body */

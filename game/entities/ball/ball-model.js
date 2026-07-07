@@ -34,6 +34,10 @@ updateRoll(velocityX, velocityZ, delta) {
 }
 
 
+  setRadius(radius) {
+    this.radius = radius;
+  }
+
   // Reset ball to starting position
   reset() {
     const start = CONFIG.ball.startPosition;

@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { CONFIG } from '../../core/config.js';
+import { createBallTexture } from './ball-textures.js';
 
 export class BallRenderer {
 
@@ -20,6 +21,7 @@ export class BallRenderer {
     this._trailTimer = 0;
     this._trailInterval = 0.03; // seconds between trail dots
 
+    this._currentTexture = null;
     this._build();
   }
 
@@ -63,6 +65,45 @@ export class BallRenderer {
 
     this.scene.add(this.mesh);
     this.scene.add(this.glowMesh);
+  }
+
+  // ── Apply a ball-type preset (geometry, material, glow) ──
+  applyPreset(preset) {
+    const { visual, physics } = preset;
+    const r = physics.ballRadius;
+
+    this.mesh.geometry.dispose();
+    this.mesh.geometry = new THREE.SphereGeometry(r, 64, 64);
+
+    if (this._ringMesh) {
+      this._ringMesh.geometry.dispose();
+      this._ringMesh.geometry = new THREE.TorusGeometry(r * 1.01, 0.02, 8, 64);
+      this._ringMesh.visible = !!visual.showRing;
+    }
+
+    this.glowMesh.geometry.dispose();
+    this.glowMesh.geometry = new THREE.SphereGeometry(r * 1.2, 16, 16);
+    this.glowMesh.material.color.setHex(visual.glowColor);
+
+    if (this._currentTexture) {
+      this._currentTexture.dispose();
+      this._currentTexture = null;
+    }
+
+    const mat = this.mesh.material;
+    const tex = createBallTexture(visual.type);
+    if (mat.map) mat.map.dispose();
+    mat.map = tex;
+    mat.color.setHex(visual.color);
+    mat.metalness = visual.metalness;
+    mat.roughness = visual.roughness;
+    mat.envMapIntensity = visual.type === 'classic' ? 1.5 : 0.6;
+    mat.needsUpdate = true;
+    this._currentTexture = tex;
+
+    CONFIG.ball.color = visual.color;
+    CONFIG.ball.metalness = visual.metalness;
+    CONFIG.ball.roughness = visual.roughness;
   }
 
   // ── Sync mesh position and rotation from the model ────────
@@ -136,6 +177,7 @@ export class BallRenderer {
     this.scene.remove(this.glowMesh);
     this.mesh.geometry.dispose();
     this.mesh.material.dispose();
+    if (this._currentTexture) this._currentTexture.dispose();
     this.glowMesh.geometry.dispose();
     this.glowMesh.material.dispose();
     if (this._ringMesh) {
