@@ -34,6 +34,7 @@ export class PhysicsEngine {
     // Current surface tilt angles (radians)
     this.tiltX = 0;
     this.tiltZ = 0;
+    this._inputActive = false;
   }
 
   // Attach ball position vector (shared reference)
@@ -48,6 +49,8 @@ export class PhysicsEngine {
 
   // Update tilt angles from input each frame
 updateTilt(inputX, inputZ, delta) {
+    this._inputActive = inputX !== 0 || inputZ !== 0;
+
     // Read live from CONFIG so the Physics Lab panel can adjust tilt feel
     const tiltSpeed   = CONFIG.physics.tiltSpeed;
     const tiltReturn  = CONFIG.physics.tiltReturn;
@@ -109,12 +112,21 @@ _clampVelocity() {
   const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
   if (speed === 0) return;
 
+  // Coasting (keys released): keep momentum — only block runaway speeds.
+  if (!this._inputActive) {
+    if (speed > this.terminalVelocity) {
+      const ratio = this.terminalVelocity / speed;
+      this.velocity.x *= ratio;
+      this.velocity.z *= ratio;
+    }
+    return;
+  }
+
+  // Actively tilting: cap speed to what the current tilt can drive.
   const tiltMag = Math.sqrt(this.tiltX ** 2 + this.tiltZ ** 2);
   const dynamicCap = this.terminalVelocity * (tiltMag / CONFIG.physics.maxTiltAngle);
-  const effectiveCap = Math.max(dynamicCap, 1.0); 
-
-  if (speed > effectiveCap) {
-    const ratio = effectiveCap / speed;
+  if (speed > dynamicCap) {
+    const ratio = dynamicCap / speed;
     this.velocity.x *= ratio;
     this.velocity.z *= ratio;
   }
@@ -123,6 +135,7 @@ _clampVelocity() {
     this.velocity.set(0, 0, 0);
     this.tiltX = 0;
     this.tiltZ = 0;
+    this._inputActive = false;
     if (CONFIG.energy.enabled) {
       this.energySystem.reset(this.velocity, height);
     }
