@@ -2,7 +2,7 @@ import { CONFIG } from '../../core/config.js';
 
 export class FrictionSystem {
 
-  constructor(mu = 0.05) {
+  constructor() {
   }
 
   apply(velocity, tiltX, tiltZ, delta) {
