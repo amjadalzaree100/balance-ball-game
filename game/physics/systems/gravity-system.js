@@ -2,7 +2,6 @@ import { CONFIG } from '../../core/config.js';
 
 export class GravitySystem {
     constructor() {
-        // No state — gravity and rollingFactor are read from CONFIG per call
     }
 
     apply(velocity, tiltX, tiltZ, delta) {

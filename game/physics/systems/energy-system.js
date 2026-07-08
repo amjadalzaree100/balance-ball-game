@@ -1,4 +1,3 @@
-// energy-system.js — Mechanical energy (الطاقة الميكانيكية)
 // Ek = ½mv²,  Ep = mgh,  E = Ek + Ep
 
 import { CONFIG } from '../../core/config.js';

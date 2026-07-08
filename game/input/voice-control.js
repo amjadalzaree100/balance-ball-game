@@ -1,44 +1,36 @@
-// voice-control.js - Speech recognition controller
-// Uses the Web Speech API (built into Chrome/Edge) to detect voice commands
-// and translate them into tilt axis values that mirror keyboard input.
+// Uses the Web Speech API 
 //
 // Supported commands:
-//   "up"    / "forward"           -> tilt surface forward  (tiltX negative)
-//   "down"  / "backward" / "back" -> tilt surface backward (tiltX positive)
-//   "left"                        -> tilt surface left      (tiltZ positive)
-//   "right"                       -> tilt surface right     (tiltZ negative)
-//   "stop"  / "hold"  / "freeze"  -> zero all tilt input
+//   "up"      -> tilt surface forward  (tiltX negative)
+//   "down"    -> tilt surface backward (tiltX positive)
+//   "left"    -> tilt surface left      (tiltZ positive)
+//   "right"   -> tilt surface right     (tiltZ negative)
+//   "stop"    -> zero all tilt input
 
 export class VoiceControl {
 
   constructor() {
-    // Current tilt values produced by voice commands (-1, 0, or 1 per axis)
+    //(-1, 0, or 1 per axis)
     this.tiltX = 0;
     this.tiltZ = 0;
 
-    // Whether the recognizer is currently listening
     this.isListening = false;
 
-    // Whether the browser supports speech recognition
     this.isSupported = false;
 
-    // Internal recognizer instance
     this._recognizer = null;
 
-    // Callback fired when a command is recognized -- optional UI hook
     this.onCommand = null;
 
-    // Callback fired when listening state changes
     this.onListeningChange = null;
 
     // Auto-stop timer: voice commands hold tilt for this many ms then release
-    this._holdDuration = 600;
+    this._holdDuration = 4000;
     this._holdTimer = null;
 
     this._init();
   }
 
-  // -- Setup ---------------------------------------------------
 
   _init() {
     const SpeechRecognition =
@@ -55,13 +47,11 @@ export class VoiceControl {
     // Continuous mode: keep listening after each result
     this._recognizer.continuous = true;
 
-    // Return results as soon as speech is detected (not after silence)
+    // Return results as soon as speech is detected 
     this._recognizer.interimResults = false;
 
-    // Language: English for command words
     this._recognizer.lang = 'en-US';
 
-    // Max alternative transcriptions to consider
     this._recognizer.maxAlternatives = 3;
 
     this._recognizer.onresult = (event) => this._onResult(event);
@@ -75,9 +65,8 @@ export class VoiceControl {
     };
   }
 
-  // -- Public API ----------------------------------------------
+  //  Public API
 
-  // Start listening for voice commands
   start() {
     if (!this.isSupported || this.isListening) return;
 
@@ -90,7 +79,6 @@ export class VoiceControl {
     }
   }
 
-  // Stop listening
   stop() {
     if (!this.isSupported || !this.isListening) return;
 
@@ -100,12 +88,11 @@ export class VoiceControl {
     if (this.onListeningChange) this.onListeningChange(false);
   }
 
-  // Toggle listening on/off
   toggle() {
     this.isListening ? this.stop() : this.start();
   }
 
-  // -- Command parsing -----------------------------------------
+  //  Command parsing 
 
   _onResult(event) {
     // Iterate only the new results (not the full history)
@@ -123,9 +110,7 @@ export class VoiceControl {
   }
 
   // Map a transcript string to tilt values.
-  // Returns true if a command was recognized.
   _parseCommand(transcript) {
-    // Split into individual words so "move left" also matches "left"
     const words = transcript.split(/\s+/);
 
     let matched = false;
@@ -203,7 +188,7 @@ export class VoiceControl {
     }
   }
 
-  // -- Error handling ------------------------------------------
+  // -- Error handling 
 
   _onError(event) {
     // 'no-speech' and 'aborted' are normal -- ignore them

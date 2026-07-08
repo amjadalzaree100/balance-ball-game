@@ -3,7 +3,6 @@ import { CONFIG } from '../../core/config.js';
 export class FrictionSystem {
 
   constructor(mu = 0.05) {
-    // No state — all values are read from CONFIG in apply()
   }
 
   apply(velocity, tiltX, tiltZ, delta) {
@@ -15,10 +14,8 @@ export class FrictionSystem {
     const cosTilt = Math.cos(tiltX) * Math.cos(tiltZ);
     const N       = g * Math.abs(cosTilt);
 
-    // ── Static friction check ─────────────────────────────
-    // Ball stays still if |g · sin(θ)| < μs · N.
-    // Using |g| (not signed g) keeps the check symmetric in worlds
-    // where gravity is inverted.
+    // ── Static friction  
+    // √( (g·sin θx)² + (g·sin θz)² )  <  μs · g · |cos θx · cos θz|
     if (speed < 0.001) {
       const sinX        = Math.sin(tiltX);
       const sinZ        = Math.sin(tiltZ);
@@ -26,40 +23,37 @@ export class FrictionSystem {
       const staticThreshold = CONFIG.physics.frictionStatic * N;
 
       if (Math.abs(drivingAccel) < staticThreshold) {
-        // Driving force is too weak — ball stays still.
         velocity.set(0, 0, 0);
         return;
       }
       return;
     }
 
-    // ── Kinetic (dry) friction ──────────────────────────────────────
+
+
+    // ── Kinetic (dry) friction 
     // F_k = μk * N
     const frictionAccel = CONFIG.physics.friction * N;
     const frictionDelta = Math.min(frictionAccel * delta, speed);
 
-    // Unit vector in the direction of current motion
     const dirX = velocity.x / speed;
     const dirZ = velocity.z / speed;
 
     velocity.x -= dirX * frictionDelta;
     velocity.z -= dirZ * frictionDelta;
 
-    // ── Viscous drag    ───────────────────────────────
+
+
+    // ── Viscous drag    
     if (CONFIG.physics.viscousFriction > 0) {
-      // Exponential decay factor: exp(-k * dt)
+      //  exp(-k * dt)
       const decay = Math.exp(-CONFIG.physics.viscousFriction * delta);
       velocity.x *= decay;
       velocity.z *= decay;
     }
 
-        // ── Dead-zone for negligible speeds ───────────────────────
-    if (Math.sqrt(velocity.x ** 2 + velocity.z ** 2) < 0.001) {
-      velocity.set(0, 0, 0);
-    }
-  }
 }
-
+}
 
 // ============================================================
 //  friction-system.js — Coulomb friction model (dry friction)

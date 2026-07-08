@@ -1,17 +1,12 @@
-// ============================================================
-//  controls.js — Reads keyboard and mouse input
-//  Gives you values between -1 and 1 for each tilt axis
-// ============================================================
 
 export class Controls {
 
   constructor() {
-    // State of pressed keys
     this._keys = new Set();
 
     // Mouse state
-    this._mouseX = 0;          // Horizontal mouse position (-1 left … 1 right)
-    this._mouseY = 0;          // Vertical mouse position (-1 top … 1 bottom)
+    this._mouseX = 0;               // Horizontal mouse position (-1 left … 1 right)
+    this._mouseY = 0;              // Vertical mouse position (-1 top … 1 bottom)
     this._mouseSensitivity = 0.7;  // Multiplier for mouse input (reduced from 1.0)
     this._mouseDeadZone   = 0.25;  // 25% dead zone around screen center
     this._mouseEnabled    = false; // Default OFF — press M to enable
@@ -29,7 +24,7 @@ export class Controls {
         this._actionCallback();
       }
 
-      // M toggles mouse tilt (ignore if a modifier is held)
+      // M toggles mouse tilt 
       if (e.code === 'KeyM' && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         this.setMouseEnabled(!this._mouseEnabled);
@@ -37,7 +32,7 @@ export class Controls {
       }
 
       // Prevent page scrolling with arrow keys
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         e.preventDefault();
       }
     });
@@ -48,20 +43,16 @@ export class Controls {
     window.addEventListener('mousemove', (e) => this._onMouseMove(e));
 
     // Voice control tilt values -- set externally by VoiceControl each frame
-    // These are added on top of keyboard / mouse / gamepad input
     this._voiceTiltX = 0;
     this._voiceTiltZ = 0;
   }
   // -- Mouse move handler
-  // Converts screen coordinates to normalized range -1 to 1
   _onMouseMove(event) {
     this._mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     this._mouseY = (event.clientY / window.innerHeight) * 2 - 1;
   }
 
-  // ── Remap a value in [-1, 1] through a centered dead zone ─────
   // Values inside the dead zone become 0; the outer range is stretched
-  // back into [-1, 1] so the response is still smooth at the edges.
   _remapWithDeadZone(v) {
     const dz = this._mouseDeadZone;
     if (Math.abs(v) < dz) return 0;
@@ -69,21 +60,21 @@ export class Controls {
     return sign * (Math.abs(v) - dz) / (1 - dz);
   }
 
-  // ── Enable / disable mouse control ─────────────────────────
+  // ── Enable / disable mouse control 
   setMouseEnabled(enabled) {
     this._mouseEnabled = !!enabled;
     if (this.onMouseEnabledChange) this.onMouseEnabledChange(this._mouseEnabled);
   }
 
-  // ── Current mouse-enabled state ────────────────────────────
+  // ── Current mouse-enabled state 
   isMouseEnabled() { return this._mouseEnabled; }
 
-  // ── Is the key currently pressed? ─────────────────────────
+  // ── Is the key currently pressed? 
   isDown(code) {
     return this._keys.has(code);
   }
 
-  // ── Gamepad support ─────────────────────────────────────────
+  // ── Gamepad support 
   _getGamepadInput() {
     const gamepads = navigator.getGamepads();
     const gamepad = gamepads[0]; // 
@@ -107,12 +98,12 @@ export class Controls {
     return { x, z };
   }
 
-  // ── Register action button callback (X / Enter) ──────────
+  // ── Register action button callback (X / Enter) 
   onAction(callback) {
     this._actionCallback = callback;
   }
 
-  // ── Check gamepad buttons (call every frame) ──────────────
+  // ── Check gamepad buttons  
   _updateGamepadButtons() {
     const gamepads = navigator.getGamepads();
     const gamepad = gamepads[0];
@@ -121,7 +112,6 @@ export class Controls {
       return;
     }
 
-    // Detect X button press (index 0) going from released → pressed
     const wasPressed = this._prevGamepadButtons[0] === true;
     const isPressed = gamepad.buttons[0]?.pressed === true;
 
@@ -138,8 +128,6 @@ export class Controls {
     this._voiceTiltZ = z;
   }
 
-  // ?? Tilt on X axis (Forward / Backward) ??????????????????
-  // Positive value = backward, negative = forward
   getTiltX() {
     let v = 0;
 
@@ -156,14 +144,11 @@ export class Controls {
     const gp = this._getGamepadInput();
     v += gp.z;
 
-    // Add voice command tilt (overrides if voice says a direction)
     v += this._voiceTiltX;
 
     return v;
   }
 
-  // ── Tilt on Z axis (Left / Right) ──────────────────────
-  // Positive value = right, negative = left
   getTiltZ() {
     let v = 0;
 
@@ -171,7 +156,6 @@ export class Controls {
     if (this.isDown('ArrowLeft') || this.isDown('KeyA')) v += 1;
     if (this.isDown('ArrowRight') || this.isDown('KeyD')) v -= 1;
 
-    // Mouse input: moving mouse right → positive tiltZ (right)
     if (this._mouseEnabled) {
       v -= this._remapWithDeadZone(this._mouseX) * this._mouseSensitivity;
     }
@@ -180,18 +164,15 @@ export class Controls {
     const gp = this._getGamepadInput();
     v -= gp.x;
 
-    // Add voice command tilt
     v += this._voiceTiltZ;
 
     return v;
   }
 
-  // Clean up events (useful when resetting the game)
   dispose() {
     this._keys.clear();
   }
 
-  // ── Call every frame (even outside PLAYING state) ─────────
   update() {
     this._updateGamepadButtons();
   }
