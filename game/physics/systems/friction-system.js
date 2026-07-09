@@ -49,7 +49,7 @@ export class FrictionSystem {
       //  exp(-k * dt)
       const decay = Math.exp(-CONFIG.physics.viscousFriction * delta);
       velocity.x *= decay;
-      velocity.z *= decay;
+      // velocity.z *= decay;
     }
 
 }

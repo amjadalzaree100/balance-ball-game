@@ -186,6 +186,7 @@ export class UI {
   onNext(cb)    { document.getElementById('next-btn').addEventListener('click', cb); }
   onRestartWin(cb)  { document.getElementById('restart-btn-win').addEventListener('click', cb); }
   onRestartLose(cb) { document.getElementById('restart-btn-lose').addEventListener('click', cb); }
+  onRandom(cb) { document.getElementById('random-btn').addEventListener('click', cb); }
 
   // ── Level selector ───────────────────────────────────────
   // Populate every `.level-buttons` container on the page with one

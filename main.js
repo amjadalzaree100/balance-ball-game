@@ -134,6 +134,16 @@ function getBallTiltedY() {
   return surfaceY + CONFIG.physics.ballRadius;
 }
 
+
+function startRandomGame() {
+  levelManager.generateRandom(11, 13); 
+  startGame();
+}
+document.getElementById('random-btn-start')?.addEventListener('click', startRandomGame);
+document.getElementById('random-btn-win')?.addEventListener('click', startRandomGame);
+document.getElementById('random-btn-lose')?.addEventListener('click', startRandomGame);
+
+
 // ============================================================
 //  Start / Restart helpers
 // ============================================================
@@ -172,6 +182,8 @@ function nextLevel() {
     startGame();
   }
 }
+
+
 
 // ============================================================
 //  Win / Lose transitions

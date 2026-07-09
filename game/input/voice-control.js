@@ -52,7 +52,7 @@ export class VoiceControl {
 
     this._recognizer.lang = 'en-US';
 
-    this._recognizer.maxAlternatives = 3;
+    this._recognizer.maxAlternatives = 10;
 
     this._recognizer.onresult = (event) => this._onResult(event);
     this._recognizer.onerror  = (event) => this._onError(event);

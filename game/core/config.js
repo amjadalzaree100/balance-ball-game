@@ -61,7 +61,7 @@ export const CONFIG = {
 
   // ── Game ──────────────────────────────────────────────────
   game: {
-    fallThreshold: -5,      // Height below which the ball is considered fallen
+    fallThreshold: -20,      // Height below which the ball is considered fallen
     goalRadius: 0.6,        // Goal area radius
     scorePerLevel: 500,    // Base points for completing the level
     timePenalty: 10,         // Points deducted per second

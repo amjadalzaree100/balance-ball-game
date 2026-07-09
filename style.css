@@ -937,3 +937,93 @@ body.physics-panel-open #mic-btn {
   transform: translateY(1px);
 }
  
+
+
+/* ── Random Maze Button ────────────────────────────────── */
+.random-btn {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 32px;
+    margin-top: 6px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.random-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.08);
+    transform: skewX(-20deg);
+    transition: left 0.4s var(--ease);
+}
+
+.random-btn:hover {
+    background: var(--cyan);
+    color: #000;
+    border-color: var(--cyan);
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.random-btn:hover::after {
+    left: 130%;
+}
+
+/* ── Level Select ─────────────────────────────────────── */
+.level-select {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.level-select-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.level-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.level-buttons button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+}
+
+.level-buttons button:hover,
+.level-buttons button.active {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
